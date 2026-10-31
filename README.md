@@ -19,3 +19,5 @@ Pull requests from branches in this repository are published at `https://ejball.
 The workflow keeps the production site and preview files together on the `gh-pages` branch, then deploys the combined site with GitHub Actions. Keep Pages configured to use **GitHub Actions**; the branch is storage for the workflow, not the Pages source. Previews are public. They share the production site's browser origin, so they also share its localStorage.
 
 If the `github-pages` environment restricts deployment branches, add the branch rule `refs/pull/*/merge` alongside `main` so PR workflows can deploy. A repository administrator may need to make that change in Settings → Environments → github-pages.
+
+The Merida chess pieces are by Armando Hernandez Marroquin and are licensed under GPL-2.0-or-later. The SVGs come from [Lichess](https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida); see [Lichess’s license notes](https://github.com/lichess-org/lila/blob/4dcff2a4653c092a5e333fd6843e37c5f0277882/COPYING.md) and the [GPL-2.0 license text](src/assets/merida/LICENSE.txt).
