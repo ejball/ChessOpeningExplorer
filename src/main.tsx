@@ -1,32 +1,399 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Chessground } from 'chessground';
-import type { Api } from 'chessground/api';
-import type { Key } from 'chessground/types';
-import type { DrawShape } from 'chessground/draw';
-import { Chess, type Square } from 'chess.js';
-import { fresh, gameAt, key, load, play, save, visit, type Session } from './tree';
-import 'chessground/assets/chessground.base.css';
-import './style.css';
+import React, { useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { Chessground } from "chessground";
+import type { Api } from "chessground/api";
+import type { Key } from "chessground/types";
+import type { DrawShape } from "chessground/draw";
+import { Chess, type Square } from "chess.js";
+import {
+  fresh,
+  gameAt,
+  key,
+  load,
+  play,
+  save,
+  visit,
+  type Session,
+} from "./tree";
+import "chessground/assets/chessground.base.css";
+import "./style.css";
 
-type Note = { title:string; text:string; segments: { text:string; shapes: DrawShape[] }[] };
+type Note = {
+  title: string;
+  text: string;
+  segments: { text: string; shapes: DrawShape[] }[];
+};
 const notes: Record<string, Note> = {
- 'e4': {title:'King’s Pawn Opening',text:'White claims space in the center and opens lines for the queen and bishop.',segments:[{text:'central space',shapes:[{orig:'e4',brush:'green'},{orig:'d5',brush:'yellow'}]},{text:'bishop’s diagonal',shapes:[{orig:'f1',dest:'c4',brush:'blue'}]}]},
- 'e4 e5 Nf3': {title:'King’s Knight Opening',text:'The knight develops and attacks the pawn on e5.',segments:[{text:'knight on f3',shapes:[{orig:'f3',brush:'green'}]},{text:'pressure on e5',shapes:[{orig:'f3',dest:'e5',brush:'blue'}]}]},
- 'e4 e5 Nf3 Nc6 Bc4': {title:'Italian Game',text:'The bishop develops toward the vulnerable f7 square and White prepares to castle.',segments:[{text:'bishop on c4',shapes:[{orig:'c4',brush:'green'}]},{text:'pressure on f7',shapes:[{orig:'c4',dest:'f7',brush:'blue'},{orig:'f7',brush:'yellow'}]},{text:'kingside castling idea',shapes:[{orig:'e1',dest:'g1',brush:'green'},{orig:'h1',dest:'f1',brush:'green'}]}]},
- 'e4 c5': {title:'Sicilian Defense',text:'Black challenges the center from the flank.',segments:[{text:'challenge to d4',shapes:[{orig:'c5',dest:'d4',brush:'blue'}]}]}
+  e4: {
+    title: "King’s Pawn Opening",
+    text: "White claims space in the center and opens lines for the queen and bishop.",
+    segments: [
+      {
+        text: "central space",
+        shapes: [
+          { orig: "e4", brush: "green" },
+          { orig: "d5", brush: "yellow" },
+        ],
+      },
+      {
+        text: "bishop’s diagonal",
+        shapes: [{ orig: "f1", dest: "c4", brush: "blue" }],
+      },
+    ],
+  },
+  "e4 e5 Nf3": {
+    title: "King’s Knight Opening",
+    text: "The knight develops and attacks the pawn on e5.",
+    segments: [
+      { text: "knight on f3", shapes: [{ orig: "f3", brush: "green" }] },
+      {
+        text: "pressure on e5",
+        shapes: [{ orig: "f3", dest: "e5", brush: "blue" }],
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 Bc4": {
+    title: "Italian Game",
+    text: "The bishop develops toward the vulnerable f7 square and White prepares to castle.",
+    segments: [
+      { text: "bishop on c4", shapes: [{ orig: "c4", brush: "green" }] },
+      {
+        text: "pressure on f7",
+        shapes: [
+          { orig: "c4", dest: "f7", brush: "blue" },
+          { orig: "f7", brush: "yellow" },
+        ],
+      },
+      {
+        text: "kingside castling idea",
+        shapes: [
+          { orig: "e1", dest: "g1", brush: "green" },
+          { orig: "h1", dest: "f1", brush: "green" },
+        ],
+      },
+    ],
+  },
+  "e4 c5": {
+    title: "Sicilian Defense",
+    text: "Black challenges the center from the flank.",
+    segments: [
+      {
+        text: "challenge to d4",
+        shapes: [{ orig: "c5", dest: "d4", brush: "blue" }],
+      },
+    ],
+  },
 };
 function App() {
- const [session,setSession] = useState<Session>(load), [shapes,setShapes] = useState<DrawShape[]>([]), [active,setActive] = useState<number|null>(null), [promotion,setPromotion] = useState<{from:Square;to:Square}|null>(null), [saved,setSaved]=useState(true);
- const board = useRef<HTMLDivElement>(null), api = useRef<Api | null>(null), state = useRef(session); state.current=session;
- const node=session.nodes[session.current], game=gameAt(session), path=game.history(), note=notes[path.join(' ')], currentVisit=session.visits[key(node.fen)];
- useEffect(()=>{ setSaved(save(session)); },[session]);
- useEffect(()=>{ if (!board.current) return; api.current=Chessground(board.current,{ drawable:{enabled:false,visible:true}, events:{}, movable:{free:false,events:{after:(from,to)=>{const g=gameAt(state.current); const piece=g.get(from as Square); if(piece?.type==='p' && (to[1]==='8'||to[1]==='1')) setPromotion({from:from as Square,to:to as Square}); else setSession(s=>play(s,from as Square,to as Square));}}} }); return ()=>{api.current?.destroy(); api.current=null;}; },[]);
- useEffect(()=>{ const dests=new Map<Key,Key[]>(); for(const m of game.moves({verbose:true})) dests.set(m.from,[...(dests.get(m.from)||[]),m.to]); api.current?.set({fen:node.fen,orientation:session.side,turnColor:game.turn()==='w'?'white':'black',check:game.isCheck(),lastMove:node.from&&node.to?[node.from,node.to]:undefined,movable:{color:game.turn()==='w'?'white':'black',dests},drawable:{autoShapes:shapes}}); },[session,shapes,promotion]);
- function go(id:string){setShapes([]);setActive(null);setSession(s=>visit(s,id));}
- function show(i:number|null){setActive(i);setShapes(i===null?[]:note?.segments[i].shapes||[]);}
- function line(id:string,depth=0):React.ReactNode { const n=session.nodes[id]; return <div className="branch" key={id} style={{marginLeft:depth?12:0}}>{n.children.map(cid=>{const c=session.nodes[cid];return <div key={cid}><button className={'move '+(cid===session.current?'selected':'')} onClick={()=>go(cid)}>{Math.ceil((Number(c.fen.split(' ')[5])-(c.fen.split(' ')[1]==='w'?1:0)))}{c.fen.split(' ')[1]==='w'?'…':'.'} {c.san}</button>{line(cid,depth+1)}</div>})}</div>; }
- const status=game.isCheckmate()?'Checkmate':game.isStalemate()?'Stalemate':game.isThreefoldRepetition()?'Draw by repetition':game.isDraw()?'Draw':`${game.turn()==='w'?'White':'Black'} to move${game.isCheck()?' · Check':''}`;
- return <><header><div className="brand">♞ <span>CHESS OPENING EXPLORER</span></div><p>A little space to think about your next move.</p></header><main><section className="play"><div className="section-head"><div><span className="eyebrow">YOUR BOARD</span><h1>Explore an opening</h1></div><div className="side"><span>Play as</span><button className={session.side==='white'?'on':''} onClick={()=>setSession(s=>({...s,side:'white'}))}>White</button><button className={session.side==='black'?'on':''} onClick={()=>setSession(s=>({...s,side:'black'}))}>Black</button></div></div><div className="board-wrap"><div ref={board} className="board" aria-label="Interactive chess board" /></div><div className="controls"><strong><i/> {status}</strong><div><button disabled={!node.parent} onClick={()=>node.parent&&go(node.parent)}>← Back</button><button disabled={!node.children.length} onClick={()=>node.children[0]&&go(node.preferred && node.children.includes(node.preferred) ? node.preferred : node.children[0])}>Forward →</button><button onClick={()=>{if(window.confirm('Start a new exploration? This clears the current tree and visits.')) {setSession(fresh(session.side));show(null);}}}>Restart</button></div></div>{promotion&&<div className="promotion" role="dialog" aria-label="Choose promotion"><strong>Promote pawn to</strong>{['q','r','b','n'].map(p=><button key={p} onClick={()=>{setSession(s=>play(s,promotion.from,promotion.to,p));setPromotion(null)}}>{({q:'Queen',r:'Rook',b:'Bishop',n:'Knight'} as Record<string,string>)[p]}</button>)}</div>}</section><aside><section className="card"><span className="eyebrow">POSITION NOTES</span><h2>{note?.title || (path.length?'Your exploration':'The starting position')}</h2><p>{note?.text || (path.length?'No curated explanation is available for this position yet.':'Choose a side and make a move to begin exploring.')}</p>{note&&<div className="ideas"><span>EXPLORE THE IDEA</span><div>{note.segments.map((seg,i)=><button key={seg.text} className={active===i?'active':''} onMouseEnter={()=>show(i)} onMouseLeave={()=>show(null)} onFocus={()=>show(i)} onBlur={()=>show(null)} onClick={()=>show(active===i?null:i)}>{seg.text} ↗</button>)}</div></div>}<p className="muted">Move evaluation and ranked suggestions are not available yet.</p></section>{(game.turn() === (session.side === 'white' ? 'b' : 'w') && !game.isGameOver()) && <section className="card"><span className="eyebrow">OPPONENT TO MOVE</span><h2>Choose a reply</h2><p className="muted">Legal replies are listed alphabetically; rankings and popularity are unavailable.</p><div className="replies">{game.moves({verbose:true}).sort((a,b)=>a.san.localeCompare(b.san)).map(m=><button key={m.lan} onClick={()=>setSession(s=>play(s,m.from,m.to,m.promotion))}>{m.san}</button>)}</div></section>}<section className="card history"><div className="card-title"><div><span className="eyebrow">YOUR JOURNEY</span><h2>Move history</h2></div><button className="text-button" onClick={()=>go('root')}>Start</button></div><p className="muted">Select a move to revisit a line. New moves create branches.</p>{node.id==='root'&&Object.keys(session.nodes).length===1?<p className="empty">Your moves will appear here.</p>:line('root')}<div className="visit">Position last viewed {currentVisit?new Date(currentVisit.lastViewedAt).toLocaleString():'—'}<br/>{currentVisit?.viewCount || 0} visit{currentVisit?.viewCount===1?'':'s'}</div></section>{!saved&&<p role="alert">Could not save this session in local storage.</p>}</aside></main><footer>Explore at your own pace. Your session stays on this device.</footer></>;
+  const [session, setSession] = useState<Session>(load),
+    [shapes, setShapes] = useState<DrawShape[]>([]),
+    [active, setActive] = useState<number | null>(null),
+    [promotion, setPromotion] = useState<{ from: Square; to: Square } | null>(
+      null,
+    ),
+    [saved, setSaved] = useState(true);
+  const board = useRef<HTMLDivElement>(null),
+    api = useRef<Api | null>(null),
+    state = useRef(session);
+  state.current = session;
+  const node = session.nodes[session.current],
+    game = gameAt(session),
+    path = game.history(),
+    note = notes[path.join(" ")],
+    currentVisit = session.visits[key(node.fen)];
+  useEffect(() => {
+    setSaved(save(session));
+  }, [session]);
+  useEffect(() => {
+    if (!board.current) return;
+    api.current = Chessground(board.current, {
+      drawable: { enabled: false, visible: true },
+      events: {},
+      movable: {
+        free: false,
+        events: {
+          after: (from, to) => {
+            const g = gameAt(state.current);
+            const piece = g.get(from as Square);
+            if (piece?.type === "p" && (to[1] === "8" || to[1] === "1"))
+              setPromotion({ from: from as Square, to: to as Square });
+            else setSession((s) => play(s, from as Square, to as Square));
+          },
+        },
+      },
+    });
+    return () => {
+      api.current?.destroy();
+      api.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    const dests = new Map<Key, Key[]>();
+    for (const m of game.moves({ verbose: true }))
+      dests.set(m.from, [...(dests.get(m.from) || []), m.to]);
+    api.current?.set({
+      fen: node.fen,
+      orientation: session.side,
+      turnColor: game.turn() === "w" ? "white" : "black",
+      check: game.isCheck(),
+      lastMove: node.from && node.to ? [node.from, node.to] : undefined,
+      movable: { color: game.turn() === "w" ? "white" : "black", dests },
+      drawable: { autoShapes: shapes },
+    });
+  }, [session, shapes, promotion]);
+  function go(id: string) {
+    setShapes([]);
+    setActive(null);
+    setSession((s) => visit(s, id));
+  }
+  function show(i: number | null) {
+    setActive(i);
+    setShapes(i === null ? [] : note?.segments[i].shapes || []);
+  }
+  function line(id: string, depth = 0): React.ReactNode {
+    const n = session.nodes[id];
+    return (
+      <div className="branch" key={id} style={{ marginLeft: depth ? 12 : 0 }}>
+        {n.children.map((cid) => {
+          const c = session.nodes[cid];
+          return (
+            <div key={cid}>
+              <button
+                className={
+                  "move " + (cid === session.current ? "selected" : "")
+                }
+                onClick={() => go(cid)}
+              >
+                {Math.ceil(
+                  Number(c.fen.split(" ")[5]) -
+                    (c.fen.split(" ")[1] === "w" ? 1 : 0),
+                )}
+                {c.fen.split(" ")[1] === "w" ? "…" : "."} {c.san}
+              </button>
+              {line(cid, depth + 1)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  const status = game.isCheckmate()
+    ? "Checkmate"
+    : game.isStalemate()
+      ? "Stalemate"
+      : game.isThreefoldRepetition()
+        ? "Draw by repetition"
+        : game.isDraw()
+          ? "Draw"
+          : `${game.turn() === "w" ? "White" : "Black"} to move${game.isCheck() ? " · Check" : ""}`;
+  return (
+    <>
+      <header>
+        <div className="brand">
+          ♞ <span>CHESS OPENING EXPLORER</span>
+        </div>
+        <p>A little space to think about your next move.</p>
+      </header>
+      <main>
+        <section className="play">
+          <div className="section-head">
+            <div>
+              <span className="eyebrow">YOUR BOARD</span>
+              <h1>Explore an opening</h1>
+            </div>
+            <div className="side">
+              <span>Play as</span>
+              <button
+                className={session.side === "white" ? "on" : ""}
+                onClick={() => setSession((s) => ({ ...s, side: "white" }))}
+              >
+                White
+              </button>
+              <button
+                className={session.side === "black" ? "on" : ""}
+                onClick={() => setSession((s) => ({ ...s, side: "black" }))}
+              >
+                Black
+              </button>
+            </div>
+          </div>
+          <div className="board-wrap">
+            <div
+              ref={board}
+              className="board"
+              aria-label="Interactive chess board"
+            />
+          </div>
+          <div className="controls">
+            <strong>
+              <i /> {status}
+            </strong>
+            <div>
+              <button
+                disabled={!node.parent}
+                onClick={() => node.parent && go(node.parent)}
+              >
+                ← Back
+              </button>
+              <button
+                disabled={!node.children.length}
+                onClick={() =>
+                  node.children[0] &&
+                  go(
+                    node.preferred && node.children.includes(node.preferred)
+                      ? node.preferred
+                      : node.children[0],
+                  )
+                }
+              >
+                Forward →
+              </button>
+              <button
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Start a new exploration? This clears the current tree and visits.",
+                    )
+                  ) {
+                    setSession(fresh(session.side));
+                    show(null);
+                  }
+                }}
+              >
+                Restart
+              </button>
+            </div>
+          </div>
+          {promotion && (
+            <div
+              className="promotion"
+              role="dialog"
+              aria-label="Choose promotion"
+            >
+              <strong>Promote pawn to</strong>
+              {["q", "r", "b", "n"].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => {
+                    setSession((s) => play(s, promotion.from, promotion.to, p));
+                    setPromotion(null);
+                  }}
+                >
+                  {
+                    (
+                      {
+                        q: "Queen",
+                        r: "Rook",
+                        b: "Bishop",
+                        n: "Knight",
+                      } as Record<string, string>
+                    )[p]
+                  }
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+        <aside>
+          <section className="card">
+            <span className="eyebrow">POSITION NOTES</span>
+            <h2>
+              {note?.title ||
+                (path.length ? "Your exploration" : "The starting position")}
+            </h2>
+            <p>
+              {note?.text ||
+                (path.length
+                  ? "No curated explanation is available for this position yet."
+                  : "Choose a side and make a move to begin exploring.")}
+            </p>
+            {note && (
+              <div className="ideas">
+                <span>EXPLORE THE IDEA</span>
+                <div>
+                  {note.segments.map((seg, i) => (
+                    <button
+                      key={seg.text}
+                      className={active === i ? "active" : ""}
+                      onMouseEnter={() => show(i)}
+                      onMouseLeave={() => show(null)}
+                      onFocus={() => show(i)}
+                      onBlur={() => show(null)}
+                      onClick={() => show(active === i ? null : i)}
+                    >
+                      {seg.text} ↗
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p className="muted">
+              Move evaluation and ranked suggestions are not available yet.
+            </p>
+          </section>
+          {game.turn() === (session.side === "white" ? "b" : "w") &&
+            !game.isGameOver() && (
+              <section className="card">
+                <span className="eyebrow">OPPONENT TO MOVE</span>
+                <h2>Choose a reply</h2>
+                <p className="muted">
+                  Legal replies are listed alphabetically; rankings and
+                  popularity are unavailable.
+                </p>
+                <div className="replies">
+                  {game
+                    .moves({ verbose: true })
+                    .sort((a, b) => a.san.localeCompare(b.san))
+                    .map((m) => (
+                      <button
+                        key={m.lan}
+                        onClick={() =>
+                          setSession((s) => play(s, m.from, m.to, m.promotion))
+                        }
+                      >
+                        {m.san}
+                      </button>
+                    ))}
+                </div>
+              </section>
+            )}
+          <section className="card history">
+            <div className="card-title">
+              <div>
+                <span className="eyebrow">YOUR JOURNEY</span>
+                <h2>Move history</h2>
+              </div>
+              <button className="text-button" onClick={() => go("root")}>
+                Start
+              </button>
+            </div>
+            <p className="muted">
+              Select a move to revisit a line. New moves create branches.
+            </p>
+            {node.id === "root" && Object.keys(session.nodes).length === 1 ? (
+              <p className="empty">Your moves will appear here.</p>
+            ) : (
+              line("root")
+            )}
+            <div className="visit">
+              Position last viewed{" "}
+              {currentVisit
+                ? new Date(currentVisit.lastViewedAt).toLocaleString()
+                : "—"}
+              <br />
+              {currentVisit?.viewCount || 0} visit
+              {currentVisit?.viewCount === 1 ? "" : "s"}
+            </div>
+          </section>
+          {!saved && (
+            <p role="alert">Could not save this session in local storage.</p>
+          )}
+        </aside>
+      </main>
+      <footer>
+        Explore at your own pace. Your session stays on this device.
+      </footer>
+    </>
+  );
 }
-createRoot(document.getElementById('root')!).render(<App/>);
+createRoot(document.getElementById("root")!).render(<App />);
