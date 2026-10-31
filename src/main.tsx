@@ -370,7 +370,7 @@ function App() {
           {opening && (
             <p className="opening-name">
               {opening.current ? "" : "Last recognized: "}
-              {opening.name} <span>({opening.eco})</span>
+              {opening.name}
             </p>
           )}
           {note ? (
