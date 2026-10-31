@@ -10,6 +10,11 @@ describe("exploration history", () => {
     s = visit(s, e4);
     s = play(s, "c7", "c5");
     expect(s.nodes[e4].children).toHaveLength(2);
+    const c5 = s.current;
+    expect(s.nodes[e4].preferred).toBe(c5);
+    const revisited = visit(s, e5);
+    expect(revisited.nodes[e4].preferred).toBe(e5);
+    expect(revisited.nodes[e4].children).toEqual([e5, c5]);
     expect(gameAt(visit(s, e5)).history()).toEqual(["e4", "e5"]);
     expect(gameAt(s).history()).toEqual(["e4", "c5"]);
     expect(s.visits[key(s.nodes[e4].fen)].viewCount).toBe(2);
