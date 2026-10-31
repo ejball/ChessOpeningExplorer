@@ -5,6 +5,9 @@ import type { Api } from "chessground/api";
 import type { Key } from "chessground/types";
 import type { DrawShape } from "chessground/draw";
 import type { Move, Square } from "chess.js";
+import { recognizeOpening } from "./openings";
+import { notes } from "./notes";
+import { candidatesFor } from "./candidates";
 import {
   fresh,
   gameAt,
@@ -17,80 +20,6 @@ import {
 } from "./tree";
 import "chessground/assets/chessground.base.css";
 import "./style.css";
-
-type Segment = { text: string; shapes?: DrawShape[] };
-type Note = { title: string; segments: Segment[] };
-const notes: Record<string, Note> = {
-  e4: {
-    title: "King’s Pawn Opening",
-    segments: [
-      { text: "White claims " },
-      {
-        text: "space in the center",
-        shapes: [
-          { orig: "e4", brush: "green" },
-          { orig: "d5", brush: "yellow" },
-        ],
-      },
-      { text: " and " },
-      {
-        text: "opens a line for the queen",
-        shapes: [{ orig: "d1", dest: "h5", brush: "blue" }],
-      },
-      { text: " and " },
-      { text: "bishop", shapes: [{ orig: "f1", dest: "c4", brush: "blue" }] },
-      { text: "." },
-    ],
-  },
-  "e4 e5 Nf3": {
-    title: "King’s Knight Opening",
-    segments: [
-      { text: "The " },
-      { text: "knight develops", shapes: [{ orig: "f3", brush: "green" }] },
-      { text: " and " },
-      {
-        text: "attacks the pawn on e5",
-        shapes: [{ orig: "f3", dest: "e5", brush: "blue" }],
-      },
-      { text: "." },
-    ],
-  },
-  "e4 e5 Nf3 Nc6 Bc4": {
-    title: "Italian Game",
-    segments: [
-      { text: "The " },
-      { text: "bishop develops", shapes: [{ orig: "c4", brush: "green" }] },
-      { text: " toward " },
-      {
-        text: "f7",
-        shapes: [
-          { orig: "c4", dest: "f7", brush: "blue" },
-          { orig: "f7", brush: "yellow" },
-        ],
-      },
-      { text: " and White prepares for " },
-      {
-        text: "kingside castling",
-        shapes: [
-          { orig: "e1", dest: "g1", brush: "green" },
-          { orig: "h1", dest: "f1", brush: "green" },
-        ],
-      },
-      { text: "." },
-    ],
-  },
-  "e4 c5": {
-    title: "Sicilian Defense",
-    segments: [
-      { text: "Black " },
-      {
-        text: "challenges the center from the flank",
-        shapes: [{ orig: "c5", dest: "d4", brush: "blue" }],
-      },
-      { text: "." },
-    ],
-  },
-};
 
 type Theme = "system" | "light" | "dark";
 function readTheme(): Theme {
@@ -115,6 +44,7 @@ function App() {
   } | null>(null);
   const [saved, setSaved] = useState(true);
   const [theme, setTheme] = useState<Theme>(readTheme);
+  const about = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
   const currentMove = useRef<HTMLButtonElement>(null);
@@ -125,6 +55,7 @@ function App() {
   const node = session.nodes[session.current];
   const game = gameAt(session);
   const note = notes[game.history().join(" ")];
+  const opening = recognizeOpening(session);
   const path = [] as (typeof node)[];
   for (
     let current = node;
@@ -345,6 +276,16 @@ function App() {
                     <option value="dark">Dark</option>
                   </select>
                 </label>
+                <button
+                  onClick={(event) => {
+                    event.currentTarget
+                      .closest("details")
+                      ?.removeAttribute("open");
+                    about.current?.showModal();
+                  }}
+                >
+                  About
+                </button>
               </div>
             </details>
           </div>
@@ -426,9 +367,14 @@ function App() {
       </section>
       <aside aria-label="Position details">
         <section className="card explanation" aria-label="Position explanation">
+          {opening && (
+            <p className="opening-name">
+              {opening.current ? "" : "Last recognized: "}
+              {opening.name} <span>({opening.eco})</span>
+            </p>
+          )}
           {note ? (
             <>
-              <p className="opening-name">{note.title}</p>
               <p>
                 {note.segments.map((segment, i) =>
                   segment.shapes ? (
@@ -462,13 +408,10 @@ function App() {
           ) : (
             <p>
               {path.length
-                ? "No curated explanation is available for this position yet."
+                ? "Explore this position."
                 : "Choose a side and make a move to begin exploring."}
             </p>
           )}
-          <p className="muted">
-            Move evaluation and ranked suggestions are not available yet.
-          </p>
         </section>
         <section className="card reply-card" aria-label="Next moves">
           {!opponentTurn && !game.isGameOver() && (
@@ -487,7 +430,7 @@ function App() {
             <p className="muted">No legal moves available.</p>
           ) : opponentTurn || showMoves ? (
             <p className="muted">
-              Choose a move. Rankings and popularity are unavailable.
+              Choose a move for {game.turn() === "w" ? "white" : "black"}.
             </p>
           ) : (
             <p className="muted">
@@ -496,33 +439,44 @@ function App() {
           )}
           {(opponentTurn || showMoves) && !game.isGameOver() && (
             <div className="replies">
-              {game
-                .moves({ verbose: true })
-                .sort((a, b) => a.san.localeCompare(b.san))
-                .map((move) => (
-                  <button
-                    key={move.lan}
-                    onPointerEnter={(event) => {
-                      if (event.pointerType === "mouse") setReply(move);
-                    }}
-                    onPointerLeave={(event) => {
-                      if (event.pointerType === "mouse") setReply(null);
-                    }}
-                    onFocus={(event) => {
-                      if (event.currentTarget.matches(":focus-visible"))
-                        setReply(move);
-                    }}
-                    onBlur={() => setReply(null)}
-                    onClick={() => {
-                      setReply(null);
-                      setSession((s) =>
-                        play(s, move.from, move.to, move.promotion),
-                      );
-                    }}
-                  >
-                    {move.san}
-                  </button>
-                ))}
+              {candidatesFor(game).map(({ move, opening, explanation }) => (
+                <button
+                  key={move.lan}
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === "mouse") setReply(move);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType === "mouse") setReply(null);
+                  }}
+                  onFocus={(event) => {
+                    if (event.currentTarget.matches(":focus-visible"))
+                      setReply(move);
+                  }}
+                  onBlur={() => setReply(null)}
+                  onClick={() => {
+                    setReply(null);
+                    setSession((s) =>
+                      play(s, move.from, move.to, move.promotion),
+                    );
+                  }}
+                >
+                  <strong>{move.san}</strong>
+                  {(opening || explanation) && (
+                    <span className="candidate-details">
+                      {opening && (
+                        <span className="candidate-opening">
+                          {opening.name}
+                        </span>
+                      )}
+                      {explanation && (
+                        <span className="candidate-explanation">
+                          {explanation}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           )}
         </section>
@@ -530,6 +484,91 @@ function App() {
           <p role="alert">Could not save this session in local storage.</p>
         )}
       </aside>
+      <dialog
+        ref={about}
+        className="about-dialog"
+        aria-labelledby="about-title"
+      >
+        <h2 id="about-title">About Chess Opening Explorer</h2>
+        <p>
+          Explore chess openings and save variations on this device. Opening
+          names are bundled with the app.
+        </p>
+        <ul>
+          <li>
+            Opening names:{" "}
+            <a
+              href="https://github.com/lichess-org/chess-openings"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Lichess chess-openings dataset
+            </a>
+            ,{" "}
+            <a
+              href="https://creativecommons.org/publicdomain/zero/1.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC0
+            </a>
+            .
+          </li>
+          <li>
+            Merida pieces: Armando Hernandez Marroquin, GPL-2.0-or-later;{" "}
+            <a
+              href="https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida"
+              target="_blank"
+              rel="noreferrer"
+            >
+              source
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              license
+            </a>
+            .
+          </li>
+          <li>
+            Interactive board:{" "}
+            <a
+              href="https://github.com/lichess-org/chessground"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Chessground
+            </a>
+            , GPL-3.0-or-later.
+          </li>
+          <li>
+            Chess rules:{" "}
+            <a
+              href="https://github.com/jhlywa/chess.js"
+              target="_blank"
+              rel="noreferrer"
+            >
+              chess.js
+            </a>
+            , BSD-2-Clause.
+          </li>
+          <li>
+            <a
+              href="https://github.com/ejball/ChessOpeningExplorer"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Application source code
+            </a>
+          </li>
+        </ul>
+        <form method="dialog">
+          <button autoFocus>Close</button>
+        </form>
+      </dialog>
     </main>
   );
 }
