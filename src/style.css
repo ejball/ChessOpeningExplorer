@@ -137,40 +137,47 @@ h2 {
 .board square.oc.move-dest {
   background: radial-gradient(transparent 65%, #42564377 67%);
 }
+/* Merida pieces by Armando Hernandez Marroquin, GPL-2.0-or-later. */
 .board piece {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "DejaVu Sans", serif;
-  font-size: clamp(26px, 7vw, 68px);
-  line-height: 1;
-  text-shadow: 0 1px 2px #3338;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
-.board piece.white {
-  color: #fff8e8;
-  -webkit-text-stroke: 1px #5b5145;
+.board piece.white.king {
+  background-image: url("./assets/merida/wK.svg");
 }
-.board piece.black {
-  color: #292d2c;
-  -webkit-text-stroke: 1px #eee3;
+.board piece.white.queen {
+  background-image: url("./assets/merida/wQ.svg");
 }
-.board piece.king:after {
-  content: "♚";
+.board piece.white.rook {
+  background-image: url("./assets/merida/wR.svg");
 }
-.board piece.queen:after {
-  content: "♛";
+.board piece.white.bishop {
+  background-image: url("./assets/merida/wB.svg");
 }
-.board piece.rook:after {
-  content: "♜";
+.board piece.white.knight {
+  background-image: url("./assets/merida/wN.svg");
 }
-.board piece.bishop:after {
-  content: "♝";
+.board piece.white.pawn {
+  background-image: url("./assets/merida/wP.svg");
 }
-.board piece.knight:after {
-  content: "♞";
+.board piece.black.king {
+  background-image: url("./assets/merida/bK.svg");
 }
-.board piece.pawn:after {
-  content: "♟";
+.board piece.black.queen {
+  background-image: url("./assets/merida/bQ.svg");
+}
+.board piece.black.rook {
+  background-image: url("./assets/merida/bR.svg");
+}
+.board piece.black.bishop {
+  background-image: url("./assets/merida/bB.svg");
+}
+.board piece.black.knight {
+  background-image: url("./assets/merida/bN.svg");
+}
+.board piece.black.pawn {
+  background-image: url("./assets/merida/bP.svg");
 }
 .controls {
   padding: 17px 0;
@@ -298,9 +305,6 @@ footer {
   }
   .side {
     margin-bottom: 12px;
-  }
-  .board piece {
-    font-size: clamp(25px, 10vw, 68px);
   }
 }
 .replies {
