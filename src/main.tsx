@@ -5,7 +5,16 @@ import type { Api } from "chessground/api";
 import type { Key } from "chessground/types";
 import type { DrawShape } from "chessground/draw";
 import type { Move, Square } from "chess.js";
-import { fresh, gameAt, load, play, save, visit, type Session } from "./tree";
+import {
+  fresh,
+  gameAt,
+  load,
+  play,
+  preferredLine,
+  save,
+  visit,
+  type Session,
+} from "./tree";
 import "chessground/assets/chessground.base.css";
 import "./style.css";
 
@@ -99,6 +108,7 @@ function App() {
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [reply, setReply] = useState<Move | null>(null);
+  const [showMoves, setShowMoves] = useState(false);
   const [promotion, setPromotion] = useState<{
     from: Square;
     to: Square;
@@ -106,6 +116,8 @@ function App() {
   const [saved, setSaved] = useState(true);
   const [theme, setTheme] = useState<Theme>(readTheme);
   const board = useRef<HTMLDivElement>(null);
+  const moveLine = useRef<HTMLElement>(null);
+  const currentMove = useRef<HTMLButtonElement>(null);
   const api = useRef<Api | null>(null);
   const state = useRef(session);
   state.current = session;
@@ -120,6 +132,7 @@ function App() {
     current = session.nodes[current.parent]
   )
     path.unshift(current);
+  const forwardMoves = preferredLine(session);
   const active = hovered ?? pinned;
   const shapes: DrawShape[] = reply
     ? [
@@ -163,7 +176,25 @@ function App() {
     setPinned(null);
     setHovered(null);
     setReply(null);
-  }, [session.current]);
+    setShowMoves(false);
+  }, [session.current, session.side]);
+  useEffect(() => {
+    const line = moveLine.current;
+    const current = currentMove.current;
+    if (!line || !current) return;
+    const keepCurrentVisible = () => {
+      const lineBounds = line.getBoundingClientRect();
+      const moveBounds = current.getBoundingClientRect();
+      if (moveBounds.right > lineBounds.right)
+        line.scrollLeft += moveBounds.right - lineBounds.right;
+      if (moveBounds.left < lineBounds.left)
+        line.scrollLeft -= lineBounds.left - moveBounds.left;
+    };
+    keepCurrentVisible();
+    const observer = new ResizeObserver(keepCurrentVisible);
+    observer.observe(line);
+    return () => observer.disconnect();
+  }, [session.current, session.nodes]);
   useEffect(() => {
     if (!board.current) return;
     api.current = Chessground(board.current, {
@@ -354,13 +385,22 @@ function App() {
             ))}
           </div>
         )}
-        <nav className="move-line" aria-label="Current move history">
-          <button onClick={() => go("root")} disabled={!node.parent}>
+        <nav
+          ref={moveLine}
+          className="move-line"
+          aria-label="Current move history"
+        >
+          <button
+            ref={node.id === "root" ? currentMove : undefined}
+            onClick={() => go("root")}
+            disabled={!node.parent}
+          >
             Start
           </button>
           {path.map((move, index) => (
             <button
               key={move.id}
+              ref={move.id === node.id ? currentMove : undefined}
               className={move.id === node.id ? "selected" : ""}
               onClick={() => go(move.id)}
             >
@@ -368,6 +408,20 @@ function App() {
               {move.san}
             </button>
           ))}
+          {forwardMoves.map((move, index) => {
+            const ply = path.length + index;
+            return (
+              <button
+                key={move.id}
+                className="future-move"
+                onClick={() => go(move.id)}
+                aria-label={`Forward to ${move.san}`}
+              >
+                {ply % 2 === 0 ? `${Math.floor(ply / 2) + 1}. ` : ""}
+                {move.san}
+              </button>
+            );
+          })}
         </nav>
       </section>
       <aside aria-label="Position details">
@@ -416,14 +470,31 @@ function App() {
             Move evaluation and ranked suggestions are not available yet.
           </p>
         </section>
-        {opponentTurn && (
-          <section
-            className="card reply-card"
-            aria-label="Legal opponent replies"
-          >
+        <section className="card reply-card" aria-label="Next moves">
+          {!opponentTurn && !game.isGameOver() && (
+            <button
+              className="show-moves"
+              aria-pressed={showMoves}
+              onClick={() => {
+                setShowMoves((visible) => !visible);
+                setReply(null);
+              }}
+            >
+              {showMoves ? "Hide moves" : "Show moves"}
+            </button>
+          )}
+          {game.isGameOver() ? (
+            <p className="muted">No legal moves available.</p>
+          ) : opponentTurn || showMoves ? (
             <p className="muted">
-              Choose a reply. Rankings and popularity are unavailable.
+              Choose a move. Rankings and popularity are unavailable.
             </p>
+          ) : (
+            <p className="muted">
+              Your move. Reveal legal moves when you want them.
+            </p>
+          )}
+          {(opponentTurn || showMoves) && !game.isGameOver() && (
             <div className="replies">
               {game
                 .moves({ verbose: true })
@@ -453,8 +524,8 @@ function App() {
                   </button>
                 ))}
             </div>
-          </section>
-        )}
+          )}
+        </section>
         {!saved && (
           <p role="alert">Could not save this session in local storage.</p>
         )}

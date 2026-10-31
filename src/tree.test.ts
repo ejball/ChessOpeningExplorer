@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fresh, gameAt, key, play, visit } from "./tree";
+import { fresh, gameAt, key, play, preferredLine, visit } from "./tree";
 describe("exploration history", () => {
   it("keeps variations and restores their positions", () => {
     let s = fresh();
@@ -18,6 +18,20 @@ describe("exploration history", () => {
     expect(gameAt(visit(s, e5)).history()).toEqual(["e4", "e5"]);
     expect(gameAt(s).history()).toEqual(["e4", "c5"]);
     expect(s.visits[key(s.nodes[e4].fen)].viewCount).toBe(2);
+  });
+  it("follows the most recently selected continuation after backtracking", () => {
+    let s = play(fresh(), "e2", "e4");
+    const e4 = s.current;
+    s = play(s, "e7", "e5");
+    const e5 = s.current;
+    s = play(s, "g1", "f3");
+    s = visit(s, e4);
+    s = play(s, "c7", "c5");
+    s = visit(s, e4);
+    expect(preferredLine(s).map((move) => move.san)).toEqual(["c5"]);
+    s = visit(s, e5);
+    s = visit(s, e4);
+    expect(preferredLine(s).map((move) => move.san)).toEqual(["e5", "Nf3"]);
   });
   it("rejects illegal moves and reuses an existing branch", () => {
     let s = fresh();

@@ -55,6 +55,20 @@ export function fresh(side: Session["side"] = "white"): Session {
     "root",
   );
 }
+// Follow the continuation most recently chosen at each position.
+export function preferredLine(s: Session, start = s.current): Node[] {
+  const line: Node[] = [];
+  let node = s.nodes[start];
+  while (node.children.length) {
+    const next =
+      node.preferred && node.children.includes(node.preferred)
+        ? node.preferred
+        : node.children[0];
+    node = s.nodes[next];
+    line.push(node);
+  }
+  return line;
+}
 export function gameAt(s: Session, id = s.current): Chess {
   const path: Node[] = [];
   let n = s.nodes[id];

@@ -689,3 +689,22 @@ aside {
     width: min(100%, calc(100dvh - 90px));
   }
 }
+
+/* Keep the active move in view while allowing touch and trackpad scrolling. */
+.move-line {
+  scrollbar-width: none;
+}
+.move-line::-webkit-scrollbar {
+  display: none;
+}
+.move-line button.future-move {
+  opacity: 0.55;
+}
+.show-moves {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 10px;
+  color: var(--text);
+  font-size: 12px;
+}
