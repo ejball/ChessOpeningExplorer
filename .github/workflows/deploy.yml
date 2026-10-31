@@ -3,40 +3,142 @@ name: Build and deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Every deployment updates the same published site and its backing branch.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
+    # Fork PRs have read-only tokens and must not publish untrusted code.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out production source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
-      - run: npm ci
-      - run: npm run build
-      - uses: actions/upload-pages-artifact@v3
+          cache-dependency-path: production/package-lock.json
+      - name: Build production
+        working-directory: production
+        run: |
+          npm ci
+          npm run build
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
         with:
-          path: dist
+          name: production-build
+          path: production/dist
+          retention-days: 1
+      - name: Check out pull request
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: actions/checkout@v4
+        with:
+          path: preview-source
+          persist-credentials: false
+      - name: Build preview
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        working-directory: preview-source
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          npm ci
+          npm run build -- --base="/ChessOpeningExplorer/preview/pr${PR_NUMBER}/"
+      - name: Upload preview build
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-build
+          path: preview-source/dist
+          retention-days: 1
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     permissions:
+      contents: write
       pages: write
       id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      # The deployment job never checks out or runs pull request code.
+      - name: Check out production repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Download production build
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: ${{ runner.temp }}/production-build
+      - name: Download preview build
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        uses: actions/download-artifact@v4
+        with:
+          name: preview-build
+          path: ${{ runner.temp }}/preview-build
+      - name: Prepare complete Pages site
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          site="$RUNNER_TEMP/pages-site"
+          if git ls-remote --exit-code --heads origin gh-pages > /dev/null; then
+            git fetch origin refs/heads/gh-pages:refs/remotes/origin/gh-pages
+            git worktree add --detach "$site" refs/remotes/origin/gh-pages
+            git -C "$site" switch -c pages-update
+          else
+            status=$?
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+            git worktree add --detach "$site" HEAD
+            git -C "$site" switch --orphan pages-update
+          fi
+          # Replace production files but keep all existing PR previews.
+          rsync -a --delete --exclude=/.git --exclude=/preview/ "$RUNNER_TEMP/production-build/" "$site/"
+          if [ "$EVENT_NAME" = pull_request ]; then
+            [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+            preview="$site/preview/pr${PR_NUMBER}"
+            rm -rf "$preview"
+            if [ "$EVENT_ACTION" != closed ]; then
+              mkdir -p "$preview"
+              cp -a "$RUNNER_TEMP/preview-build/." "$preview/"
+            fi
+          fi
+          git -C "$site" config user.name 'github-actions[bot]'
+          git -C "$site" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$site" add -A
+          if ! git -C "$site" diff --cached --quiet; then
+            git -C "$site" commit -m 'Update Pages site'
+            git -C "$site" push origin HEAD:refs/heads/gh-pages
+          fi
+      - name: Upload complete Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/pages-site
+      - name: Deploy Pages site
+        id: deploy
         uses: actions/deploy-pages@v4
+      - name: Show preview URL
+        if: github.event_name == 'pull_request' && github.event.action != 'closed'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Preview: https://ejball.github.io/ChessOpeningExplorer/preview/pr${PR_NUMBER}/" >> "$GITHUB_STEP_SUMMARY"
