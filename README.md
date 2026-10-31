@@ -1,6 +1,6 @@
 # Chess Opening Explorer
 
-A browser-based chess opening explorer for personal learning. Explore legal moves, preserve variations, and revisit positions on this device. Curated notes illustrate a few opening ideas; engine evaluation and ranked suggestions are not available yet.
+A browser-based chess opening explorer for personal learning. Explore legal moves, preserve variations, and revisit positions on this device. Opening names come from the bundled Lichess chess-openings dataset; curated notes illustrate a few opening ideas. Engine evaluation and ranked suggestions are not available yet.
 
 ## Development
 
@@ -23,3 +23,7 @@ The workflow keeps the production site and preview files together on the `gh-pag
 If the `github-pages` environment restricts deployment branches, add the branch rule `refs/pull/*/merge` alongside `main` so PR workflows can deploy. A repository administrator may need to make that change in Settings → Environments → github-pages.
 
 The Merida chess pieces are by Armando Hernandez Marroquin and are licensed under GPL-2.0-or-later. The SVGs come from [Lichess](https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida); see [Lichess’s license notes](https://github.com/lichess-org/lila/blob/4dcff2a4653c092a5e333fd6843e37c5f0277882/COPYING.md) and the [GPL-2.0 license text](src/assets/merida/LICENSE.txt).
+
+## Opening data
+
+The bundled [Lichess chess-openings](https://github.com/lichess-org/chess-openings) snapshot is dedicated to the public domain under CC0. The five TSV source files and license in `data/openings/` are pinned to commit `712a58be746c143f4ab935b68acc50f4bac813eb`. Run `npm run generate:openings` to rebuild `src/data/openings.json` from those files. Names are matched by position, then by walking back along the current line when needed; labels on legal moves indicate named resulting positions, not move quality.

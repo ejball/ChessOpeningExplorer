@@ -708,3 +708,51 @@ aside {
   color: var(--text);
   font-size: 12px;
 }
+
+.replies button:has(span) {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  text-align: left;
+}
+.replies button span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.about-dialog {
+  width: min(35rem, calc(100% - 2rem));
+  max-height: min(80dvh, 45rem);
+  overflow: auto;
+  padding: 20px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.about-dialog::backdrop {
+  background: #0009;
+}
+.about-dialog h2 {
+  margin-top: 0;
+}
+.about-dialog p,
+.about-dialog li {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.about-dialog li + li {
+  margin-top: 6px;
+}
+.about-dialog a {
+  color: var(--accent);
+}
+.about-dialog form {
+  text-align: right;
+}
+.about-dialog button {
+  background: var(--surface-soft);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 14px;
+}
