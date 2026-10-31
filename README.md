@@ -1,21 +1,13 @@
 # Chess Opening Explorer
 
-A browser-based chess opening explorer for personal learning. The implementation is not yet scaffolded.
+A browser-based chess opening explorer for personal learning. Explore legal moves, preserve variations, and revisit positions on this device. Curated notes illustrate a few opening ideas; engine evaluation and ranked suggestions are not available yet.
 
-- [Product specification](SPEC.md)
-- [Architecture](ARCHITECTURE.md)
-- [Instructions for coding agents](AGENTS.md)
+## Development
 
-## Planned stack
+Use Node.js 22 or newer and npm. Run `npm ci`, then `npm run dev`. Run `npm run typecheck`, `npm test`, and `npm run build` to validate changes. The app stores its exploration session in browser localStorage; Restart clears that session's tree and position visits.
 
-React, TypeScript, Vite, chess.js, Chessground, Vitest, localStorage, and GitHub Pages. No backend or paid APIs initially.
+The static build uses `/ChessOpeningExplorer/` as its base path for GitHub Pages. In repository Settings → Pages, select GitHub Actions as the deployment source.
 
-## Deployment
+Chessground is GPL-3.0 licensed; see its license in the dependency and the source at https://github.com/lichess-org/chessground. This application's source is available at https://github.com/ejball/ChessOpeningExplorer.
 
-GitHub Pages project URL: https://ejball.github.io/ChessOpeningExplorer/
-
-The Vite configuration must set `base: '/ChessOpeningExplorer/'`. In GitHub repository **Settings → Pages**, choose **GitHub Actions** as the build and deployment source. The workflow in `.github/workflows/deploy.yml` deploys the `dist` folder after a successful build. Deployment will not work until the app has a package.json and a passing build.
-
-## Workflow
-
-Discuss product decisions and review in ChatGPT; implement focused tasks with Codex Cloud as pull requests; test the resulting website; repeat.
+See [SPEC.md](SPEC.md), [ARCHITECTURE.md](ARCHITECTURE.md), and [AGENTS.md](AGENTS.md) for product and development guidance.
