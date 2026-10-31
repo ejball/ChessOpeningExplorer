@@ -84,6 +84,18 @@ const notes: Record<string, Note> = {
     ],
   },
 };
+type Theme = "system" | "light" | "dark";
+
+function readTheme(): Theme {
+  try {
+    const value = localStorage.getItem("chess-explorer-theme");
+    if (value === "light" || value === "dark") return value;
+  } catch {
+    // The system preference still works when storage is unavailable.
+  }
+  return "system";
+}
+
 function App() {
   const [session, setSession] = useState<Session>(load),
     [shapes, setShapes] = useState<DrawShape[]>([]),
@@ -91,7 +103,8 @@ function App() {
     [promotion, setPromotion] = useState<{ from: Square; to: Square } | null>(
       null,
     ),
-    [saved, setSaved] = useState(true);
+    [saved, setSaved] = useState(true),
+    [theme, setTheme] = useState<Theme>(readTheme);
   const board = useRef<HTMLDivElement>(null),
     api = useRef<Api | null>(null),
     state = useRef(session);
@@ -101,6 +114,17 @@ function App() {
     path = game.history(),
     note = notes[path.join(" ")],
     currentVisit = session.visits[key(node.fen)];
+  useEffect(() => {
+    if (theme === "system")
+      document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.dataset.theme = theme;
+    try {
+      if (theme === "system") localStorage.removeItem("chess-explorer-theme");
+      else localStorage.setItem("chess-explorer-theme", theme);
+    } catch {
+      // The chosen theme still applies for the current session.
+    }
+  }, [theme]);
   useEffect(() => {
     setSaved(save(session));
   }, [session]);
@@ -192,7 +216,17 @@ function App() {
         <div className="brand">
           ♞ <span>CHESS OPENING EXPLORER</span>
         </div>
-        <p>A little space to think about your next move.</p>
+        <label className="theme-control">
+          <span>Appearance</span>
+          <select
+            value={theme}
+            onChange={(event) => setTheme(event.target.value as Theme)}
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
       </header>
       <main>
         <section className="play">
@@ -390,9 +424,6 @@ function App() {
           )}
         </aside>
       </main>
-      <footer>
-        Explore at your own pace. Your session stays on this device.
-      </footer>
     </>
   );
 }
