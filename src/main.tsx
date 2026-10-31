@@ -5,7 +5,9 @@ import type { Api } from "chessground/api";
 import type { Key } from "chessground/types";
 import type { DrawShape } from "chessground/draw";
 import type { Move, Square } from "chess.js";
-import { openingAt, recognizeOpening } from "./openings";
+import { recognizeOpening } from "./openings";
+import { notes } from "./notes";
+import { candidatesFor } from "./candidates";
 import {
   fresh,
   gameAt,
@@ -18,80 +20,6 @@ import {
 } from "./tree";
 import "chessground/assets/chessground.base.css";
 import "./style.css";
-
-type Segment = { text: string; shapes?: DrawShape[] };
-type Note = { title: string; segments: Segment[] };
-const notes: Record<string, Note> = {
-  e4: {
-    title: "King’s Pawn Opening",
-    segments: [
-      { text: "White claims " },
-      {
-        text: "space in the center",
-        shapes: [
-          { orig: "e4", brush: "green" },
-          { orig: "d5", brush: "yellow" },
-        ],
-      },
-      { text: " and " },
-      {
-        text: "opens a line for the queen",
-        shapes: [{ orig: "d1", dest: "h5", brush: "blue" }],
-      },
-      { text: " and " },
-      { text: "bishop", shapes: [{ orig: "f1", dest: "c4", brush: "blue" }] },
-      { text: "." },
-    ],
-  },
-  "e4 e5 Nf3": {
-    title: "King’s Knight Opening",
-    segments: [
-      { text: "The " },
-      { text: "knight develops", shapes: [{ orig: "f3", brush: "green" }] },
-      { text: " and " },
-      {
-        text: "attacks the pawn on e5",
-        shapes: [{ orig: "f3", dest: "e5", brush: "blue" }],
-      },
-      { text: "." },
-    ],
-  },
-  "e4 e5 Nf3 Nc6 Bc4": {
-    title: "Italian Game",
-    segments: [
-      { text: "The " },
-      { text: "bishop develops", shapes: [{ orig: "c4", brush: "green" }] },
-      { text: " toward " },
-      {
-        text: "f7",
-        shapes: [
-          { orig: "c4", dest: "f7", brush: "blue" },
-          { orig: "f7", brush: "yellow" },
-        ],
-      },
-      { text: " and White prepares for " },
-      {
-        text: "kingside castling",
-        shapes: [
-          { orig: "e1", dest: "g1", brush: "green" },
-          { orig: "h1", dest: "f1", brush: "green" },
-        ],
-      },
-      { text: "." },
-    ],
-  },
-  "e4 c5": {
-    title: "Sicilian Defense",
-    segments: [
-      { text: "Black " },
-      {
-        text: "challenges the center from the flank",
-        shapes: [{ orig: "c5", dest: "d4", brush: "blue" }],
-      },
-      { text: "." },
-    ],
-  },
-};
 
 type Theme = "system" | "light" | "dark";
 function readTheme(): Theme {
@@ -480,13 +408,10 @@ function App() {
           ) : (
             <p>
               {path.length
-                ? "No curated explanation is available for this position yet."
+                ? "Explore this position."
                 : "Choose a side and make a move to begin exploring."}
             </p>
           )}
-          <p className="muted">
-            Move evaluation and ranked suggestions are not available yet.
-          </p>
         </section>
         <section className="card reply-card" aria-label="Next moves">
           {!opponentTurn && !game.isGameOver() && (
@@ -505,7 +430,7 @@ function App() {
             <p className="muted">No legal moves available.</p>
           ) : opponentTurn || showMoves ? (
             <p className="muted">
-              Choose a move. Rankings and popularity are unavailable.
+              Choose a move for {game.turn() === "w" ? "white" : "black"}.
             </p>
           ) : (
             <p className="muted">
@@ -514,36 +439,44 @@ function App() {
           )}
           {(opponentTurn || showMoves) && !game.isGameOver() && (
             <div className="replies">
-              {game
-                .moves({ verbose: true })
-                .sort((a, b) => a.san.localeCompare(b.san))
-                .map((move) => (
-                  <button
-                    key={move.lan}
-                    onPointerEnter={(event) => {
-                      if (event.pointerType === "mouse") setReply(move);
-                    }}
-                    onPointerLeave={(event) => {
-                      if (event.pointerType === "mouse") setReply(null);
-                    }}
-                    onFocus={(event) => {
-                      if (event.currentTarget.matches(":focus-visible"))
-                        setReply(move);
-                    }}
-                    onBlur={() => setReply(null)}
-                    onClick={() => {
-                      setReply(null);
-                      setSession((s) =>
-                        play(s, move.from, move.to, move.promotion),
-                      );
-                    }}
-                  >
-                    <strong>{move.san}</strong>
-                    {openingAt(move.after) && (
-                      <span>{openingAt(move.after)?.name}</span>
-                    )}
-                  </button>
-                ))}
+              {candidatesFor(game).map(({ move, opening, explanation }) => (
+                <button
+                  key={move.lan}
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === "mouse") setReply(move);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType === "mouse") setReply(null);
+                  }}
+                  onFocus={(event) => {
+                    if (event.currentTarget.matches(":focus-visible"))
+                      setReply(move);
+                  }}
+                  onBlur={() => setReply(null)}
+                  onClick={() => {
+                    setReply(null);
+                    setSession((s) =>
+                      play(s, move.from, move.to, move.promotion),
+                    );
+                  }}
+                >
+                  <strong>{move.san}</strong>
+                  {(opening || explanation) && (
+                    <span className="candidate-details">
+                      {opening && (
+                        <span className="candidate-opening">
+                          {opening.name}
+                        </span>
+                      )}
+                      {explanation && (
+                        <span className="candidate-explanation">
+                          {explanation}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           )}
         </section>
@@ -559,8 +492,7 @@ function App() {
         <h2 id="about-title">About Chess Opening Explorer</h2>
         <p>
           Explore chess openings and save variations on this device. Opening
-          names are bundled with the app; move quality and popularity are not
-          currently evaluated.
+          names are bundled with the app.
         </p>
         <ul>
           <li>

@@ -756,3 +756,21 @@ aside {
   border-radius: 5px;
   padding: 7px 14px;
 }
+
+.replies button:has(.candidate-details) {
+  display: inline-flex;
+  align-items: flex-start;
+  max-width: 100%;
+}
+.candidate-details {
+  display: grid;
+  gap: 2px;
+}
+.replies button .candidate-opening {
+  color: var(--text);
+  font-weight: 600;
+}
+.replies button .candidate-explanation {
+  color: var(--muted);
+  line-height: 1.35;
+}
