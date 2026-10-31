@@ -74,7 +74,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' && format('https://ejball.com/ChessOpeningExplorer/preview/pr{0}/', github.event.pull_request.number) || steps.deploy.outputs.page_url }}
     steps:
       # The deployment job never checks out or runs pull request code.
       - name: Check out production repository
