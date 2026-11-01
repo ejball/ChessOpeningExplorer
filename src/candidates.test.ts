@@ -11,7 +11,7 @@ describe("candidate context", () => {
     const sicilian = candidates.find(({ move }) => move.san === "c5");
     expect(sicilian?.opening?.name).toBe("Sicilian Defense");
     expect(sicilian?.explanation).toBe(
-      "Black challenges the center from the flank.",
+      "Black uses the c-pawn to control d4 without mirroring White’s central pawn. A later exchange on d4 can leave Black with an extra central pawn.",
     );
     expect(game.fen()).toBe(fen);
     expect(game.history()).toEqual(["e4"]);

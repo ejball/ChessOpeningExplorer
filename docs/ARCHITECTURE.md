@@ -9,7 +9,7 @@ A static React + TypeScript web application built with Vite, hosted at GitHub Pa
 - `src/main.tsx` coordinates the board, controls, appearance toggle, About modal, and the shared scrollable explanation and move pane. Long explanations expand on request.
 - `src/tree.ts` manages the variation tree, full FENs, preferred continuations, explored moves, and versioned localStorage session.
 - `src/openings.ts` reads the generated position index; `src/candidates.ts` adds available opening names and sample notes to legal moves. The [data README](../data/README.md) records sources and regeneration.
-- `src/notes.ts` contains four initial sample explanations and their non-mutating board annotations.
+- `src/notes.ts` contains hand-written explanations derived from pinned Wikibooks source revisions, with non-mutating board annotations. Source snapshots, licensing and attribution are documented in `data/README.md`.
 - `src/useEngine.ts` runs the single-threaded Stockfish.js worker, leaves it idle between requested searches so it can reuse its cache, and terminates it when the position changes; `src/engine.ts` parses and groups complete UCI analysis iterations.
 - `src/style.css` contains the responsive light/dark presentation. Production and PR previews are built by `.github/workflows/deploy.yml`.
 
