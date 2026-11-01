@@ -1,6 +1,7 @@
 import { Chess, type Square } from "chess.js";
 import { describe, expect, it } from "vitest";
 import snapshotJson from "../data/wikibooks/chess-opening-theory.json?raw";
+import manifestText from "../data/wikibooks/PROCESSING.md?raw";
 import { notes } from "./notes";
 
 const snapshot = JSON.parse(snapshotJson) as {
@@ -8,6 +9,30 @@ const snapshot = JSON.parse(snapshotJson) as {
 };
 
 describe("curated explanations", () => {
+  it("keeps the processing manifest in sync with explained positions", () => {
+    const rows = manifestText
+      .split("\n")
+      .filter((line) => line.startsWith("| `"))
+      .map((line) => {
+        const [, sequence, source, revision, status] = line
+          .split("|")
+          .map((value) => value.trim());
+        return { sequence: sequence.slice(1, -1), source, revision, status };
+      });
+    const explained = rows.filter((row) => row.status === "explained");
+    expect(explained).toHaveLength(Object.keys(notes).length);
+    const seen = new Set<string>();
+    for (const row of explained) {
+      expect(
+        seen.has(row.sequence),
+        `Duplicate entry for ${row.sequence}`,
+      ).toBe(false);
+      seen.add(row.sequence);
+      expect(notes[row.sequence]?.sourceRevision).toBe(Number(row.revision));
+      expect(row.source).toContain(`oldid=${row.revision}`);
+    }
+  });
+
   it("match legal move sequences to their pinned source pages and occupied annotation origins", () => {
     for (const [moves, note] of Object.entries(notes)) {
       const game = new Chess();
