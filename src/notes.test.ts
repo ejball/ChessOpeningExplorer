@@ -1,10 +1,14 @@
 import { Chess, type Square } from "chess.js";
 import { describe, expect, it } from "vitest";
 import snapshotJson from "../data/wikibooks/chess-opening-theory.json?raw";
+import completeSnapshotJson from "../data/wikibooks/complete-book.json?raw";
 import manifestText from "../data/wikibooks/PROCESSING.md?raw";
 import { notes } from "./notes";
 
 const snapshot = JSON.parse(snapshotJson) as {
+  pages: { title: string; revisionId: number }[];
+};
+const completeSnapshot = JSON.parse(completeSnapshotJson) as {
   pages: { title: string; revisionId: number }[];
 };
 
@@ -20,6 +24,37 @@ describe("curated explanations", () => {
         return { sequence: sequence.slice(1, -1), source, revision, status };
       });
     const explained = rows.filter((row) => row.status === "explained");
+    const titles = new Set<string>();
+    const currentRevisions = new Map(
+      completeSnapshot.pages.map((page) => [page.title, page.revisionId]),
+    );
+    for (const row of rows) {
+      const label = row.source.match(/^\[([^\]]+)\]\(/)?.[1];
+      expect(label, `Invalid source link: ${row.source}`).toBeDefined();
+      const title =
+        label === "Chess Opening Theory"
+          ? label
+          : `Chess Opening Theory/${label}`;
+      expect(currentRevisions.has(title), `Unknown source page: ${title}`).toBe(
+        true,
+      );
+      expect([
+        "unprocessed",
+        "explained",
+        "no-useful-prose",
+        "duplicate-position",
+        "needs-review",
+      ]).toContain(row.status);
+      if (row.status === "unprocessed") {
+        expect(
+          Number(row.revision),
+          `Stale unprocessed revision: ${title}`,
+        ).toBe(currentRevisions.get(title));
+      }
+      expect(row.source).toContain(`oldid=${row.revision}`);
+      titles.add(title);
+    }
+    expect(titles.size).toBe(completeSnapshot.pages.length);
     expect(explained).toHaveLength(Object.keys(notes).length);
     const seen = new Set<string>();
     for (const row of explained) {
