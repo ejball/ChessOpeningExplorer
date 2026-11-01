@@ -8,6 +8,9 @@ import type { Move, Square } from "chess.js";
 import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
 import { candidatesFor } from "./candidates";
+import { boardScore, scoreDescription, scoreSide } from "./engine";
+import { useEngine } from "./useEngine";
+import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
 import {
   exploredMoves,
   fresh,
@@ -38,7 +41,8 @@ function App() {
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [reply, setReply] = useState<Move | null>(null);
-  const [showMoves, setShowMoves] = useState(false);
+  const [moveVisibility, setMoveVisibility] = useState(loadMoveVisibility);
+  const [engineRetry, setEngineRetry] = useState(0);
   const [promotion, setPromotion] = useState<{
     from: Square;
     to: Square;
@@ -59,6 +63,16 @@ function App() {
   const node = session.nodes[session.current];
   const game = gameAt(session);
   const note = notes[game.history().join(" ")];
+  const legalMoves = game.moves({ verbose: true });
+  const history = game.history({ verbose: true }).map((move) => move.lan);
+  const { analysis, thinkMore } = useEngine(
+    node.id,
+    history,
+    legalMoves.length,
+    game.turn() === "w",
+    game.isGameOver(),
+    engineRetry,
+  );
   const opening = recognizeOpening(session);
   const path = [] as (typeof node)[];
   for (
@@ -118,8 +132,10 @@ function App() {
     setPinned(null);
     setHovered(null);
     setReply(null);
-    setShowMoves(false);
   }, [session.current, session.side]);
+  useEffect(() => {
+    saveMoveVisibility(moveVisibility);
+  }, [moveVisibility]);
   useEffect(() => {
     const line = moveLine.current;
     const current = currentMove.current;
@@ -190,9 +206,42 @@ function App() {
       ? node.preferred
       : node.children[0];
   const isDark = theme === "system" ? systemDark : theme === "dark";
+  const engineMoves = new Map(
+    analysis?.moves.map((move) => [move.uci, move]) ?? [],
+  );
+  const candidates = candidatesFor(game);
+  if (
+    engineMoves.size === legalMoves.length &&
+    legalMoves.length > 0 &&
+    candidates.every(({ move }) => engineMoves.has(move.lan))
+  ) {
+    candidates.sort(
+      (a, b) =>
+        engineMoves.get(a.move.lan)!.rank - engineMoves.get(b.move.lan)!.rank,
+    );
+  }
+  const positionScore = analysis?.moves[0]?.score;
+  const engineTooltip = [
+    "Stockfish",
+    analysis?.status === "error"
+      ? "unavailable"
+      : analysis?.depth
+        ? `depth ${analysis.depth}`
+        : "starting",
+    analysis?.status === "analyzing" ? "analyzing" : "",
+    analysis?.status === "incomplete" ? "incomplete" : "",
+    analysis?.status === "ready" && analysis.elapsedMs
+      ? `${(analysis.elapsedMs / 1000).toFixed(1)}s`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const opponentTurn =
     game.turn() === (session.side === "white" ? "b" : "w") &&
     !game.isGameOver();
+  const movesVisible =
+    !game.isGameOver() &&
+    (opponentTurn ? moveVisibility.opponent : moveVisibility.own);
 
   return (
     <main>
@@ -202,6 +251,40 @@ function App() {
             <i /> {status}
           </strong>
           <div className="control-buttons">
+            {!game.isGameOver() && (
+              <span
+                className={`evaluation-pill engine-evaluation ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
+                title={engineTooltip}
+                aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}`}
+                role="status"
+                aria-live="polite"
+                tabIndex={0}
+              >
+                {positionScore
+                  ? boardScore(positionScore)
+                  : analysis?.status === "error"
+                    ? "!"
+                    : analysis?.status === "incomplete"
+                      ? "!"
+                      : "…"}
+              </span>
+            )}
+            {!game.isGameOver() && (
+              <button
+                className="icon-button"
+                aria-label="Think more"
+                title={
+                  analysis?.status === "analyzing" ? "Analyzing…" : "Think more"
+                }
+                disabled={!analysis?.canContinue}
+                onClick={thinkMore}
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="m15.5 15.5 4.5 4.5M10.5 7.5v6m-3-3h6" />
+                </svg>
+              </button>
+            )}
             <button
               onClick={() =>
                 setSession((s) => ({
@@ -414,32 +497,47 @@ function App() {
           )}
         </section>
         <section className="card reply-card" aria-label="Next moves">
-          {!opponentTurn && !game.isGameOver() && (
-            <button
-              className="show-moves"
-              aria-pressed={showMoves}
-              onClick={() => {
-                setShowMoves((visible) => !visible);
-                setReply(null);
-              }}
-            >
-              {showMoves ? "Hide moves" : "Show moves"}
-            </button>
-          )}
-          {game.isGameOver() ? (
+          <div className="move-visibility">
+            {opponentTurn ? (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={moveVisibility.opponent}
+                  onChange={(event) => {
+                    const checked = event.currentTarget.checked;
+                    setMoveVisibility((previous) => ({
+                      ...previous,
+                      opponent: checked,
+                    }));
+                    setReply(null);
+                  }}
+                />{" "}
+                Show opponent moves
+              </label>
+            ) : (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={moveVisibility.own}
+                  onChange={(event) => {
+                    const checked = event.currentTarget.checked;
+                    setMoveVisibility((previous) => ({
+                      ...previous,
+                      own: checked,
+                    }));
+                    setReply(null);
+                  }}
+                />{" "}
+                Show your moves
+              </label>
+            )}
+          </div>
+          {game.isGameOver() && (
             <p className="muted">No legal moves available.</p>
-          ) : opponentTurn || showMoves ? (
-            <p className="muted">
-              Choose a move for {game.turn() === "w" ? "white" : "black"}.
-            </p>
-          ) : (
-            <p className="muted">
-              Your move. Reveal legal moves when you want them.
-            </p>
           )}
-          {(opponentTurn || showMoves) && !game.isGameOver() && (
+          {movesVisible && (
             <div className="replies">
-              {candidatesFor(game).map(({ move, opening, explanation }) => (
+              {candidates.map(({ move, opening, explanation }) => (
                 <button
                   key={move.lan}
                   onPointerEnter={(event) => {
@@ -460,28 +558,40 @@ function App() {
                     );
                   }}
                 >
-                  <strong>{move.san}</strong>
-                  {(opening || explanation) && (
-                    <span className="candidate-details">
+                  <span className="candidate-main">
+                    <span className="candidate-heading">
+                      <strong>{move.san}</strong>
                       {opening && (
                         <span className="candidate-opening">
                           {opening.name}
                         </span>
                       )}
-                      {explanation && (
-                        <span className="candidate-explanation">
-                          {explanation}
+                      {explored.has(move.lan) && (
+                        <span
+                          className="explored-marker"
+                          title="Previously explored"
+                        >
+                          <span aria-hidden="true">✓</span>
+                          <span className="sr-only">Previously explored</span>
                         </span>
                       )}
                     </span>
-                  )}
-                  {explored.has(move.lan) && (
+                    {explanation && (
+                      <span className="candidate-explanation">
+                        {explanation}
+                      </span>
+                    )}
+                  </span>
+                  {engineMoves.get(move.lan) && (
                     <span
-                      className="explored-marker"
-                      title="Previously explored"
+                      className={`evaluation-pill move-score score-${scoreSide(engineMoves.get(move.lan)!.score)}`}
+                      role="img"
+                      aria-label={scoreDescription(
+                        engineMoves.get(move.lan)!.score,
+                      )}
+                      title={scoreDescription(engineMoves.get(move.lan)!.score)}
                     >
-                      <span aria-hidden="true">●</span>
-                      <span className="sr-only">Previously explored</span>
+                      {boardScore(engineMoves.get(move.lan)!.score)}
                     </span>
                   )}
                 </button>
@@ -489,6 +599,15 @@ function App() {
             </div>
           )}
         </section>
+        {(analysis?.status === "error" ||
+          analysis?.status === "incomplete") && (
+          <p role="alert">
+            Stockfish analysis did not finish.{" "}
+            <button onClick={() => setEngineRetry((value) => value + 1)}>
+              Retry
+            </button>
+          </p>
+        )}
         {!saved && (
           <p role="alert">Could not save this session in local storage.</p>
         )}
@@ -553,6 +672,33 @@ function App() {
               Chessground
             </a>
             , GPL-3.0-or-later.
+          </li>
+          <li>
+            Engine:{" "}
+            <a
+              href="https://github.com/nmrugg/stockfish.js/tree/v19.0.1"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Stockfish.js 19 lite
+            </a>{" "}
+            (Stockfish, GPL-3.0);{" "}
+            <a
+              href="https://github.com/official-stockfish/Stockfish"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Stockfish source
+            </a>{" "}
+            and{" "}
+            <a
+              href={`${import.meta.env.BASE_URL}engine/COPYING.txt`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              license
+            </a>
+            .
           </li>
           <li>
             Chess rules:{" "}

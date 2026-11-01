@@ -789,8 +789,10 @@ aside {
 }
 .explored-marker {
   color: var(--accent) !important;
-  font-size: 9px !important;
-  padding-top: 2px;
+  font-size: 14px !important;
+  text-align: center;
+  width: 1.25em;
+  min-height: 1em;
 }
 .sr-only {
   position: absolute;
@@ -921,4 +923,149 @@ h2,
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.replies button .move-score {
+  margin-left: auto;
+  flex: none;
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.move-visibility {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  margin: 8px 0;
+}
+.move-visibility label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.move-visibility input {
+  accent-color: var(--selected);
+}
+
+/* Keep the evaluation next to the controls and use a consistent icon width. */
+.controls .control-buttons button {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+}
+.engine-evaluation {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.engine-evaluation.score-white {
+  color: #182019;
+  background: #fff;
+  border-color: #b5bdb4;
+}
+.engine-evaluation.score-black {
+  color: #fff;
+  background: #202522;
+  border-color: #707a71;
+}
+.engine-evaluation.score-neutral,
+.engine-evaluation.score-pending {
+  color: var(--text);
+  background: var(--surface-soft);
+}
+.candidate-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.candidate-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+}
+.replies button .explored-marker {
+  display: inline;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--accent);
+  font-size: 14px;
+  line-height: inherit;
+}
+.replies button .candidate-heading strong {
+  font-size: 15px;
+}
+
+/* Evaluation badges stay compact; their color identifies the side ahead. */
+html,
+body {
+  overflow: hidden;
+}
+.play {
+  scrollbar-gutter: stable;
+}
+.controls {
+  flex-wrap: nowrap;
+}
+.controls > strong {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.control-buttons {
+  flex: none;
+  flex-wrap: nowrap;
+}
+.evaluation-pill,
+.replies button .evaluation-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  min-height: 22px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.evaluation-pill.score-white,
+.replies button .evaluation-pill.score-white {
+  color: #182019;
+  background: #fff;
+  border-color: #b5bdb4;
+}
+.evaluation-pill.score-black,
+.replies button .evaluation-pill.score-black {
+  color: #fff;
+  background: #202522;
+  border-color: #707a71;
+}
+.evaluation-pill.score-neutral,
+.evaluation-pill.score-pending,
+.replies button .evaluation-pill.score-neutral {
+  color: var(--text);
+  background: var(--surface-soft);
+}
+.opening-name {
+  font-weight: 700;
+}
+.engine-evaluation:focus-visible {
+  outline: 3px solid #c08b37;
+  outline-offset: 2px;
 }

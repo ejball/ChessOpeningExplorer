@@ -10,6 +10,7 @@ A static React + TypeScript web application built with Vite, hosted at GitHub Pa
 - `src/tree.ts` manages the variation tree, full FENs, preferred continuations, explored moves, and versioned localStorage session.
 - `src/openings.ts` reads the generated position index; `src/candidates.ts` adds available opening names and sample notes to legal moves. The [data README](../data/README.md) records sources and regeneration.
 - `src/notes.ts` contains four initial sample explanations and their non-mutating board annotations.
+- `src/useEngine.ts` runs the single-threaded Stockfish.js worker, leaves it idle between requested searches so it can reuse its cache, and terminates it when the position changes; `src/engine.ts` parses and groups complete UCI analysis iterations.
 - `src/style.css` contains the responsive light/dark presentation. Production and PR previews are built by `.github/workflows/deploy.yml`.
 
 The sections below also describe intended future capabilities; they are not all implemented yet.
@@ -20,7 +21,7 @@ The sections below also describe intended future capabilities; they are not all 
 - `chessground`: interactive board, highlighting, arrows, move animations. Validate GPL-3.0 license compliance; publish this project's source and appropriate notices.
 - React + TypeScript: presentation and state coordination.
 - Vitest (plus testing-library as appropriate): unit and UI tests.
-- Opening names: bundled CC0 Lichess chess-openings snapshot. Later: browser Web Worker running Stockfish/WASM and optional live Lichess Opening Explorer statistics; review service terms, caching and API limits before integration.
+- Opening names: bundled CC0 Lichess chess-openings snapshot. Stockfish.js 19 lite runs in a browser worker. Optional live Lichess Opening Explorer statistics remain future work; review service terms, caching and API limits before integration.
 
 ## Possible future modules (suggested, not prescriptive)
 
