@@ -1,8 +1,18 @@
-# Proposed Architecture
+# Architecture and Design Notes
 
 ## Delivery model
 
 A static React + TypeScript web application built with Vite, hosted at GitHub Pages via GitHub Actions. No server-side runtime for MVP. Set Vite `base: '/ChessOpeningExplorer/'` for the project site. Prefer relative asset URLs and avoid client-side deep-link routing that requires server rewrites.
+
+## Current implementation
+
+- `src/main.tsx` coordinates the board, controls, settings modal, explanation pane, and move list.
+- `src/tree.ts` manages the variation tree, full FENs, preferred continuations, explored moves, and versioned localStorage session.
+- `src/openings.ts` reads the generated position index; `src/candidates.ts` adds available opening names and sample notes to legal moves. The [data README](data/README.md) records sources and regeneration.
+- `src/notes.ts` contains four initial sample explanations and their non-mutating board annotations.
+- `src/style.css` contains the responsive light/dark presentation. Production and PR previews are built by `.github/workflows/deploy.yml`.
+
+The sections below also describe intended future capabilities; they are not all implemented yet.
 
 ## Libraries
 
@@ -10,9 +20,9 @@ A static React + TypeScript web application built with Vite, hosted at GitHub Pa
 - `chessground`: interactive board, highlighting, arrows, move animations. Validate GPL-3.0 license compliance; publish this project's source and appropriate notices.
 - React + TypeScript: presentation and state coordination.
 - Vitest (plus testing-library as appropriate): unit and UI tests.
-- Later: browser Web Worker running Stockfish/WASM, and Lichess Opening Explorer or a redistributable local opening dataset. Review data terms, licenses, caching and API limits before integrating.
+- Opening names: bundled CC0 Lichess chess-openings snapshot. Later: browser Web Worker running Stockfish/WASM and optional live Lichess Opening Explorer statistics; review service terms, caching and API limits before integration.
 
-## Key modules (suggested, not prescriptive)
+## Possible future modules (suggested, not prescriptive)
 
 - `domain/gameTree.ts`: variation tree nodes, parent/child relationships, current cursor, undo/redo/branch selection. Full game state per node; never truncate siblings.
 - `domain/positions.ts`: normalized position identities and transposition-aware visit metadata; update on every navigation to a position.
@@ -51,9 +61,9 @@ Full FEN is needed for restoring exact game state (including move counters and a
 - Test branching navigation and persistent storage round-trip.
 - Test position identity/transposition tracking and visit updates.
 - Test explanation hover/touch activation and deactivation without state mutation.
-- CI: install, typecheck, test, build.
+- Current Pages workflow installs and builds; run `npm test` separately. Adding tests to CI is future work.
 - Deploy `dist` with official GitHub Pages Actions upon accepted changes to `main`.
-- Keep GitHub Pages deployment permission minimal (`pages:write`, `id-token:write` on deploy job).
+- The Pages deployment job uses `contents:write` for the shared `gh-pages` storage branch, plus `pages:write` and `id-token:write` for deployment.
 - Avoid API keys/secrets for initial release.
 
 ## Iteration workflow

@@ -45,7 +45,7 @@ function App() {
   } | null>(null);
   const [saved, setSaved] = useState(true);
   const [theme, setTheme] = useState<Theme>(readTheme);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settings = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
   const currentMove = useRef<HTMLButtonElement>(null);
@@ -219,13 +219,13 @@ function App() {
               ↻
             </button>
             <button
-              onClick={() => setSettingsOpen((open) => !open)}
-              aria-label={settingsOpen ? "Close settings" : "Open settings"}
-              aria-expanded={settingsOpen}
-              aria-controls={settingsOpen ? "settings-view" : undefined}
-              title={settingsOpen ? "Close settings" : "Settings"}
+              onClick={() => settings.current?.showModal()}
+              aria-label="Open settings"
+              aria-haspopup="dialog"
+              aria-controls="settings-dialog"
+              title="Settings"
             >
-              {settingsOpen ? "×" : "⚙︎"}
+              ⚙︎
             </button>
           </div>
         </div>
@@ -234,106 +234,7 @@ function App() {
             ref={board}
             className="board"
             aria-label="Interactive chess board"
-            aria-hidden={settingsOpen}
-            style={{ visibility: settingsOpen ? "hidden" : "visible" }}
           />
-          {settingsOpen && (
-            <section
-              className="settings-view"
-              id="settings-view"
-              aria-label="Settings and About"
-            >
-              <h2>Settings</h2>
-              <label className="settings-appearance">
-                Appearance{" "}
-                <select
-                  aria-label="Appearance"
-                  value={theme}
-                  onChange={(event) => setTheme(event.target.value as Theme)}
-                >
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                </select>
-              </label>
-              <h2>About</h2>
-              <p>
-                Explore chess openings and save variations on this device.
-                Opening names are bundled with the app.
-              </p>
-              <ul>
-                <li>
-                  Opening names:{" "}
-                  <a
-                    href="https://github.com/lichess-org/chess-openings"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Lichess chess-openings dataset
-                  </a>
-                  ,{" "}
-                  <a
-                    href="https://creativecommons.org/publicdomain/zero/1.0/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    CC0
-                  </a>
-                  .
-                </li>
-                <li>
-                  Merida pieces: Armando Hernandez Marroquin, GPL-2.0-or-later;{" "}
-                  <a
-                    href="https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    source
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    license
-                  </a>
-                  .
-                </li>
-                <li>
-                  Interactive board:{" "}
-                  <a
-                    href="https://github.com/lichess-org/chessground"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Chessground
-                  </a>
-                  , GPL-3.0-or-later.
-                </li>
-                <li>
-                  Chess rules:{" "}
-                  <a
-                    href="https://github.com/jhlywa/chess.js"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    chess.js
-                  </a>
-                  , BSD-2-Clause.
-                </li>
-                <li>
-                  <a
-                    href="https://github.com/ejball/ChessOpeningExplorer"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Application source code
-                  </a>
-                </li>
-              </ul>
-            </section>
-          )}
         </div>
         {promotion && (
           <div
@@ -411,7 +312,9 @@ function App() {
               disabled={!node.parent}
               onClick={() => node.parent && go(node.parent)}
             >
-              ‹
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m15 5-7 7 7 7" />
+              </svg>
             </button>
             <button
               className="navigation-button"
@@ -420,7 +323,9 @@ function App() {
               disabled={!preferred}
               onClick={() => preferred && go(preferred)}
             >
-              ›
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m9 5 7 7-7 7" />
+              </svg>
             </button>
           </div>
         </div>
@@ -521,15 +426,6 @@ function App() {
                   }}
                 >
                   <strong>{move.san}</strong>
-                  {explored.has(move.lan) && (
-                    <span
-                      className="explored-marker"
-                      title="Previously explored"
-                    >
-                      <span aria-hidden="true">●</span>
-                      <span className="sr-only">Previously explored</span>
-                    </span>
-                  )}
                   {(opening || explanation) && (
                     <span className="candidate-details">
                       {opening && (
@@ -544,6 +440,15 @@ function App() {
                       )}
                     </span>
                   )}
+                  {explored.has(move.lan) && (
+                    <span
+                      className="explored-marker"
+                      title="Previously explored"
+                    >
+                      <span aria-hidden="true">●</span>
+                      <span className="sr-only">Previously explored</span>
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -553,6 +458,105 @@ function App() {
           <p role="alert">Could not save this session in local storage.</p>
         )}
       </aside>
+      <dialog
+        ref={settings}
+        className="settings-dialog"
+        id="settings-dialog"
+        aria-labelledby="settings-title"
+      >
+        <h2 id="settings-title">Settings</h2>
+        <label className="settings-appearance">
+          Appearance{" "}
+          <select
+            aria-label="Appearance"
+            value={theme}
+            onChange={(event) => setTheme(event.target.value as Theme)}
+          >
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <h2>About</h2>
+        <p>
+          Explore chess openings and save variations on this device. Opening
+          names are bundled with the app.
+        </p>
+        <ul>
+          <li>
+            Opening names:{" "}
+            <a
+              href="https://github.com/lichess-org/chess-openings"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Lichess chess-openings dataset
+            </a>
+            ,{" "}
+            <a
+              href="https://creativecommons.org/publicdomain/zero/1.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC0
+            </a>
+            .
+          </li>
+          <li>
+            Merida pieces: Armando Hernandez Marroquin, GPL-2.0-or-later;{" "}
+            <a
+              href="https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida"
+              target="_blank"
+              rel="noreferrer"
+            >
+              source
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              license
+            </a>
+            .
+          </li>
+          <li>
+            Interactive board:{" "}
+            <a
+              href="https://github.com/lichess-org/chessground"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Chessground
+            </a>
+            , GPL-3.0-or-later.
+          </li>
+          <li>
+            Chess rules:{" "}
+            <a
+              href="https://github.com/jhlywa/chess.js"
+              target="_blank"
+              rel="noreferrer"
+            >
+              chess.js
+            </a>
+            , BSD-2-Clause.
+          </li>
+          <li>
+            <a
+              href="https://github.com/ejball/ChessOpeningExplorer"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Application source code
+            </a>
+          </li>
+        </ul>
+        <form method="dialog">
+          <button autoFocus>Close</button>
+        </form>
+      </dialog>
     </main>
   );
 }

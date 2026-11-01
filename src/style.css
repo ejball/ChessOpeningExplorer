@@ -149,15 +149,13 @@ main {
   color: var(--muted);
 }
 h1 {
-  font:
-    normal 24px Georgia,
-    serif;
+  font-size: 24px;
+  font-weight: normal;
   margin: 1px 0 5px;
 }
 h2 {
-  font:
-    normal 21px Georgia,
-    serif;
+  font-size: 21px;
+  font-weight: normal;
   margin: 4px 0 8px;
 }
 .side {
@@ -719,44 +717,6 @@ aside {
   color: var(--muted);
   font-size: 11px;
 }
-.about-dialog {
-  width: min(35rem, calc(100% - 2rem));
-  max-height: min(80dvh, 45rem);
-  overflow: auto;
-  padding: 20px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-.about-dialog::backdrop {
-  background: #0009;
-}
-.about-dialog h2 {
-  margin-top: 0;
-}
-.about-dialog p,
-.about-dialog li {
-  font-size: 14px;
-  line-height: 1.5;
-}
-.about-dialog li + li {
-  margin-top: 6px;
-}
-.about-dialog a {
-  color: var(--accent);
-}
-.about-dialog form {
-  text-align: right;
-}
-.about-dialog button {
-  background: var(--surface-soft);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 7px 14px;
-}
-
 .replies button:has(.candidate-details) {
   display: inline-flex;
   align-items: flex-start;
@@ -843,33 +803,6 @@ aside {
   white-space: nowrap;
   border: 0;
 }
-.settings-view {
-  position: absolute;
-  inset: 0;
-  overflow: auto;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px;
-}
-.settings-view h2 {
-  margin: 0 0 10px;
-}
-.settings-view h2:not(:first-child) {
-  margin-top: 22px;
-}
-.settings-view p,
-.settings-view li {
-  font-size: 13px;
-  line-height: 1.5;
-}
-.settings-view li + li {
-  margin-top: 6px;
-}
-.settings-view a {
-  color: var(--accent);
-}
 .settings-appearance {
   display: flex;
   align-items: center;
@@ -894,4 +827,75 @@ aside {
   .board-footer {
     width: min(100%, calc(100dvh - 90px));
   }
+}
+
+/* Use one typeface and consistent controls throughout the explorer. */
+h1,
+h2,
+.board coords {
+  font-family: inherit;
+}
+.controls .control-buttons button,
+.navigation-button,
+.move-line button {
+  height: 32px;
+}
+.navigation-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.navigation-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.explored-marker {
+  margin-left: auto;
+  flex: none;
+}
+.settings-dialog {
+  width: min(35rem, calc(100% - 2rem));
+  max-height: min(85dvh, 45rem);
+  overflow: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+.settings-dialog::backdrop {
+  background: #0009;
+}
+.settings-dialog h2 {
+  margin: 0 0 10px;
+}
+.settings-dialog h2:not(:first-child) {
+  margin-top: 22px;
+}
+.settings-dialog p,
+.settings-dialog li {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.settings-dialog li + li {
+  margin-top: 6px;
+}
+.settings-dialog a {
+  color: var(--accent);
+}
+.settings-dialog form {
+  text-align: right;
+}
+.settings-dialog form button {
+  color: var(--text);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 14px;
 }
