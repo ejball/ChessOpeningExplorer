@@ -11,7 +11,7 @@ describe("candidate context", () => {
     const sicilian = candidates.find(({ move }) => move.san === "c5");
     expect(sicilian?.opening?.name).toBe("Sicilian Defense");
     expect(sicilian?.explanation).toBe(
-      "Black challenges the center from the flank.",
+      "Black uses the c-pawn to control d4 without mirroring White’s central pawn. A later exchange on d4 can leave Black with an extra central pawn.",
     );
     expect(game.fen()).toBe(fen);
     expect(game.history()).toEqual(["e4"]);
@@ -19,7 +19,7 @@ describe("candidate context", () => {
 
   it("puts moves with context before moves without it", () => {
     const game = new Chess();
-    game.move("e4");
+    for (const move of ["e4", "e5", "Nf3", "Nc6"]) game.move(move);
     const candidates = candidatesFor(game);
     const contextual = candidates.filter(
       (item) => item.opening || item.explanation,
@@ -31,5 +31,14 @@ describe("candidate context", () => {
     expect(plain.length).toBeGreaterThan(0);
     expect(candidates.slice(0, contextual.length)).toEqual(contextual);
     expect(candidates.slice(contextual.length)).toEqual(plain);
+  });
+
+  it("offers the French advance explanation after Black challenges the center", () => {
+    const game = new Chess();
+    for (const move of ["e4", "e6", "d4", "d5"]) game.move(move);
+    const before = game.fen();
+    const advance = candidatesFor(game).find(({ move }) => move.san === "e5");
+    expect(advance?.explanation).toContain("restricting Black’s kingside knight");
+    expect(game.fen()).toBe(before);
   });
 });

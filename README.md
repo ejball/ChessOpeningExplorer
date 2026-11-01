@@ -1,6 +1,6 @@
 # Chess Opening Explorer
 
-A browser-based chess opening explorer for personal learning. Explore legal moves, preserve variations, and revisit positions on this device. Opening names come from the bundled Lichess chess-openings dataset; curated notes illustrate a few opening ideas. A browser-based Stockfish prototype evaluates the position and ranks legal moves.
+A browser-based chess opening explorer for personal learning. Explore legal moves, preserve variations, and revisit positions on this device. Opening names come from the bundled Lichess chess-openings dataset; curated notes explain opening ideas using pinned Wikibooks source material. A browser-based Stockfish prototype evaluates the position and ranks legal moves.
 
 ## Development
 

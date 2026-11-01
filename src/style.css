@@ -651,6 +651,7 @@ aside {
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
+  overflow-wrap: anywhere;
   cursor: pointer;
 }
 .annotation[aria-pressed="true"] {
@@ -1105,6 +1106,13 @@ aside.details-pane > .reply-card {
 .explanation-content {
   display: flow-root;
 }
+.explanation .note-source {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.note-source-link {
+  color: var(--muted);
+}
 .show-more-slot {
   height: 26px;
 }
@@ -1129,10 +1137,17 @@ aside.details-pane > .reply-card {
     --explanation-height: 126px;
   }
   .details-pane .explanation-window.overflowing:not(.expanded) {
-    mask-image: linear-gradient(to bottom, black calc(100% - 21px), transparent);
+    mask-image: linear-gradient(
+      to bottom,
+      black calc(100% - 21px),
+      transparent
+    );
   }
   .details-pane .explanation p {
     font-size: 14px;
+  }
+  .details-pane .explanation .note-source {
+    font-size: 12px;
   }
   .details-pane .explanation .opening-name {
     font-size: 13px !important;

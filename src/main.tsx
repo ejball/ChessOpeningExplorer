@@ -152,13 +152,13 @@ function App() {
         content.getBoundingClientRect().height > limit + 0.5,
       );
       const bottom = viewport.getBoundingClientRect().top + limit;
-      // Do not tab into annotation controls hidden below the collapsed region.
+      // Do not tab into controls hidden below the collapsed region.
       content
-        .querySelectorAll<HTMLButtonElement>("button.annotation")
-        .forEach((button) => {
-          button.tabIndex =
+        .querySelectorAll<HTMLElement>(".annotation, a.note-source-link")
+        .forEach((control) => {
+          control.tabIndex =
             explanationExpanded ||
-            button.getBoundingClientRect().bottom <= bottom
+            control.getBoundingClientRect().bottom <= bottom
               ? 0
               : -1;
         });
@@ -507,9 +507,11 @@ function App() {
                   <p>
                     {note.segments.map((segment, i) =>
                       segment.shapes ? (
-                        <button
+                        <span
                           key={i}
                           className="annotation"
+                          role="button"
+                          tabIndex={0}
                           aria-pressed={pinned === i}
                           onPointerEnter={(event) => {
                             if (event.pointerType === "mouse") setHovered(i);
@@ -525,13 +527,32 @@ function App() {
                           onClick={() =>
                             setPinned((previous) => (previous === i ? null : i))
                           }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              if (!event.repeat)
+                                setPinned((previous) =>
+                                  previous === i ? null : i,
+                                );
+                            }
+                          }}
                         >
                           {segment.text}
-                        </button>
+                        </span>
                       ) : (
                         <span key={i}>{segment.text}</span>
                       ),
                     )}
+                  </p>
+                  <p className="note-source">
+                    <a
+                      className="note-source-link"
+                      href={`https://en.wikibooks.org/w/index.php?oldid=${note.sourceRevision}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Adapted from Wikibooks · CC BY-SA 4.0
+                    </a>
                   </p>
                 </>
               ) : (
@@ -684,6 +705,25 @@ function App() {
           names are bundled with the app.
         </p>
         <ul>
+          <li>
+            Opening explanations: adapted from{" "}
+            <a
+              href="https://en.wikibooks.org/wiki/Chess_Opening_Theory"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Wikibooks contributors
+            </a>
+            ,{" "}
+            <a
+              href="https://creativecommons.org/licenses/by-sa/4.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC BY-SA 4.0
+            </a>
+            . Each explanation links to its source revision.
+          </li>
           <li>
             Opening names:{" "}
             <a
