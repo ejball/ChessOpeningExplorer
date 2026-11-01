@@ -13,6 +13,23 @@ const completeSnapshot = JSON.parse(completeSnapshotJson) as {
 };
 
 describe("curated explanations", () => {
+  it("covers every legal first move and every reply to 1. e4 and 1. d4", () => {
+    const game = new Chess();
+    for (const move of game.moves()) {
+      expect(notes[move], `Missing explanation for 1. ${move}`).toBeDefined();
+    }
+    for (const firstMove of ["e4", "d4"]) {
+      game.move(firstMove);
+      for (const move of game.moves()) {
+        expect(
+          notes[`${firstMove} ${move}`],
+          `Missing explanation for 1. ${firstMove} ${move}`,
+        ).toBeDefined();
+      }
+      game.undo();
+    }
+  });
+
   it("keeps the processing manifest in sync with explained positions", () => {
     const rows = manifestText
       .split("\n")

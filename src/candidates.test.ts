@@ -19,7 +19,7 @@ describe("candidate context", () => {
 
   it("puts moves with context before moves without it", () => {
     const game = new Chess();
-    game.move("e4");
+    for (const move of ["e4", "e5", "Nf3", "Nc6"]) game.move(move);
     const candidates = candidatesFor(game);
     const contextual = candidates.filter(
       (item) => item.opening || item.explanation,
