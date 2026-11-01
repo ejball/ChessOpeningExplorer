@@ -1006,3 +1006,66 @@ h2,
 .replies button .candidate-heading strong {
   font-size: 15px;
 }
+
+/* Evaluation badges stay compact; their color identifies the side ahead. */
+html,
+body {
+  overflow: hidden;
+}
+.play {
+  scrollbar-gutter: stable;
+}
+.controls {
+  flex-wrap: nowrap;
+}
+.controls > strong {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.control-buttons {
+  flex: none;
+  flex-wrap: nowrap;
+}
+.evaluation-pill,
+.replies button .evaluation-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  min-height: 22px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.evaluation-pill.score-white,
+.replies button .evaluation-pill.score-white {
+  color: #182019;
+  background: #fff;
+  border-color: #b5bdb4;
+}
+.evaluation-pill.score-black,
+.replies button .evaluation-pill.score-black {
+  color: #fff;
+  background: #202522;
+  border-color: #707a71;
+}
+.evaluation-pill.score-neutral,
+.evaluation-pill.score-pending,
+.replies button .evaluation-pill.score-neutral {
+  color: var(--text);
+  background: var(--surface-soft);
+}
+.opening-name {
+  font-weight: 700;
+}
+.engine-evaluation:focus-visible {
+  outline: 3px solid #c08b37;
+  outline-offset: 2px;
+}

@@ -5,6 +5,7 @@ import {
   Iterations,
   parseInfo,
   scoreSide,
+  scoreDescription,
 } from "./engine";
 
 describe("Stockfish analysis", () => {
@@ -25,11 +26,17 @@ describe("Stockfish analysis", () => {
   });
 
   it("shows a positive magnitude and the advantaged side on the board", () => {
-    expect(boardScore({ kind: "cp", value: -125 })).toBe("Black +1.25");
+    expect(boardScore({ kind: "cp", value: -125 })).toBe("+1.25");
+    expect(scoreDescription({ kind: "cp", value: -125 })).toBe(
+      "Black ahead by 1.25",
+    );
     expect(scoreSide({ kind: "cp", value: -125 })).toBe("black");
-    expect(boardScore({ kind: "cp", value: 35 })).toBe("White +0.35");
+    expect(boardScore({ kind: "cp", value: 35 })).toBe("+0.35");
     expect(scoreSide({ kind: "cp", value: 0 })).toBe("neutral");
-    expect(boardScore({ kind: "mate", value: -3 })).toBe("Black mates in 3");
+    expect(boardScore({ kind: "mate", value: -3 })).toBe("M3");
+    expect(scoreDescription({ kind: "mate", value: -3 })).toBe(
+      "Black mates in 3",
+    );
   });
 
   it("ignores bounds and incomplete lines", () => {

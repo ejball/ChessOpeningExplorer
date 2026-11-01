@@ -43,11 +43,20 @@ export function formatScore(score: Score): string {
   return `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
 }
 
-// Board evaluation names the advantaged side and uses a positive magnitude.
+// The pill color identifies the advantaged side; the text is a positive magnitude.
 export function boardScore(score: Score): string {
+  if (score.kind === "mate")
+    return score.value === 0 ? "M" : `M${Math.abs(score.value)}`;
+  return score.value === 0
+    ? "0.00"
+    : `+${(Math.abs(score.value) / 100).toFixed(2)}`;
+}
+
+// Color alone is not sufficient for screen readers or tooltip users.
+export function scoreDescription(score: Score): string {
   if (score.kind === "mate") return formatScore(score);
-  if (score.value === 0) return "0.00";
-  return `${score.value > 0 ? "White" : "Black"} +${(Math.abs(score.value) / 100).toFixed(2)}`;
+  if (score.value === 0) return "Equal evaluation, 0.00";
+  return `${score.value > 0 ? "White" : "Black"} ahead by ${(Math.abs(score.value) / 100).toFixed(2)}`;
 }
 
 export function scoreSide(score: Score): "white" | "black" | "neutral" {

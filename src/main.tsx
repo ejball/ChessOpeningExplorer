@@ -8,7 +8,7 @@ import type { Move, Square } from "chess.js";
 import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
 import { candidatesFor } from "./candidates";
-import { boardScore, formatScore, scoreSide } from "./engine";
+import { boardScore, scoreDescription, scoreSide } from "./engine";
 import { useEngine } from "./useEngine";
 import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
 import {
@@ -223,7 +223,11 @@ function App() {
   const positionScore = analysis?.moves[0]?.score;
   const engineTooltip = [
     "Stockfish",
-    analysis?.depth ? `depth ${analysis.depth}` : "starting",
+    analysis?.status === "error"
+      ? "unavailable"
+      : analysis?.depth
+        ? `depth ${analysis.depth}`
+        : "starting",
     analysis?.status === "analyzing" ? "analyzing" : "",
     analysis?.status === "incomplete" ? "incomplete" : "",
     analysis?.status === "ready" && analysis.elapsedMs
@@ -249,19 +253,20 @@ function App() {
           <div className="control-buttons">
             {!game.isGameOver() && (
               <span
-                className={`engine-evaluation ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
+                className={`evaluation-pill engine-evaluation ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
                 title={engineTooltip}
-                aria-label={`${positionScore ? boardScore(positionScore) : "Analyzing"}. ${engineTooltip}`}
+                aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}`}
+                role="status"
                 aria-live="polite"
                 tabIndex={0}
               >
                 {positionScore
                   ? boardScore(positionScore)
                   : analysis?.status === "error"
-                    ? "Analysis unavailable"
+                    ? "!"
                     : analysis?.status === "incomplete"
-                      ? "Analysis incomplete"
-                      : "Analyzing…"}
+                      ? "!"
+                      : "…"}
               </span>
             )}
             <button
@@ -476,52 +481,43 @@ function App() {
           )}
         </section>
         <section className="card reply-card" aria-label="Next moves">
-          <div
-            className="move-visibility"
-            role="group"
-            aria-label="Move visibility"
-          >
-            <label>
-              <input
-                type="checkbox"
-                checked={moveVisibility.own}
-                onChange={(event) => {
-                  setMoveVisibility((previous) => ({
-                    ...previous,
-                    own: event.target.checked,
-                  }));
-                  setReply(null);
-                }}
-              />{" "}
-              Show your moves
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={moveVisibility.opponent}
-                onChange={(event) => {
-                  setMoveVisibility((previous) => ({
-                    ...previous,
-                    opponent: event.target.checked,
-                  }));
-                  setReply(null);
-                }}
-              />{" "}
-              Show opponent moves
-            </label>
+          <div className="move-visibility">
+            {opponentTurn ? (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={moveVisibility.opponent}
+                  onChange={(event) => {
+                    const checked = event.currentTarget.checked;
+                    setMoveVisibility((previous) => ({
+                      ...previous,
+                      opponent: checked,
+                    }));
+                    setReply(null);
+                  }}
+                />{" "}
+                Show opponent moves
+              </label>
+            ) : (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={moveVisibility.own}
+                  onChange={(event) => {
+                    const checked = event.currentTarget.checked;
+                    setMoveVisibility((previous) => ({
+                      ...previous,
+                      own: checked,
+                    }));
+                    setReply(null);
+                  }}
+                />{" "}
+                Show your moves
+              </label>
+            )}
           </div>
-          {game.isGameOver() ? (
+          {game.isGameOver() && (
             <p className="muted">No legal moves available.</p>
-          ) : movesVisible ? (
-            <p className="muted">
-              Choose a move for {game.turn() === "w" ? "white" : "black"}.
-            </p>
-          ) : (
-            <p className="muted">
-              {opponentTurn
-                ? "Opponent moves are hidden."
-                : "Your moves are hidden."}
-            </p>
           )}
           {movesVisible && (
             <div className="replies">
@@ -572,10 +568,14 @@ function App() {
                   </span>
                   {engineMoves.get(move.lan) && (
                     <span
-                      className="move-score"
-                      title={`Stockfish depth ${analysis?.depth}`}
+                      className={`evaluation-pill move-score score-${scoreSide(engineMoves.get(move.lan)!.score)}`}
+                      role="img"
+                      aria-label={scoreDescription(
+                        engineMoves.get(move.lan)!.score,
+                      )}
+                      title={scoreDescription(engineMoves.get(move.lan)!.score)}
                     >
-                      {formatScore(engineMoves.get(move.lan)!.score)}
+                      {boardScore(engineMoves.get(move.lan)!.score)}
                     </span>
                   )}
                 </button>
