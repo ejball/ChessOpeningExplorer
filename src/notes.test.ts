@@ -85,7 +85,7 @@ describe("curated explanations", () => {
     }
   });
 
-  it("match legal move sequences to their pinned source pages and occupied annotation origins", () => {
+  it("matches legal move sequences to their pinned sources and validates annotation squares", () => {
     for (const [moves, note] of Object.entries(notes)) {
       const game = new Chess();
       for (const move of moves.split(" ")) game.move(move);
@@ -106,10 +106,13 @@ describe("curated explanations", () => {
       for (const segment of note.segments) {
         for (const shape of segment.shapes ?? []) {
           expect(shape.orig).toMatch(/^[a-h][1-8]$/);
-          expect(
-            game.get(shape.orig as Square),
-            `${moves}: no piece at ${shape.orig}`,
-          ).toBeDefined();
+          if (shape.dest) {
+            expect(shape.dest).toMatch(/^[a-h][1-8]$/);
+            expect(
+              game.get(shape.orig as Square),
+              `${moves}: no piece at ${shape.orig}`,
+            ).toBeDefined();
+          }
         }
       }
     }

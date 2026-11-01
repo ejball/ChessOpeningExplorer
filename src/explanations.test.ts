@@ -29,6 +29,20 @@ describe("explanation XML compiler", () => {
     });
   });
 
+  it("can highlight an empty square mentioned in a future plan", () => {
+    const compiled = compileExplanations(
+      wrap('White may play <square at="d4">d4</square> later.'),
+      sources,
+    );
+    expect(compiled.e4).toMatchObject({
+      segments: [
+        { text: "White may play " },
+        { text: "d4", shapes: [{ orig: "d4", brush: "green" }] },
+        { text: " later." },
+      ],
+    });
+  });
+
   it("rejects malformed XML, unsupported tags, empty origins, and incorrect sources", () => {
     expect(() =>
       compileExplanations("<explanations><bad></explanations>", sources),
@@ -37,7 +51,10 @@ describe("explanation XML compiler", () => {
       compileExplanations(wrap('<link at="e4">pawn</link>'), sources),
     ).toThrow("Unknown annotation");
     expect(() =>
-      compileExplanations(wrap('<square at="e5">pawn</square>'), sources),
+      compileExplanations(
+        wrap('<arrow from="e5" to="d4">attack</arrow>'),
+        sources,
+      ),
     ).toThrow("No piece on e5");
     expect(() =>
       compileExplanations(

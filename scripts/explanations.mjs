@@ -85,7 +85,7 @@ export function compileExplanations(xml, sources) {
         (kind === "arrow" && !/^[a-h][1-8]$/.test(destination ?? ""))
       )
         throw new Error(`Invalid annotation squares in ${moves}`);
-      if (!game.get(origin))
+      if (kind === "arrow" && !game.get(origin))
         throw new Error(`No piece on ${origin} in ${moves}`);
       const shape =
         kind === "arrow"
