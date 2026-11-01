@@ -1,6 +1,6 @@
 # Agent instructions
 
-Read SPEC.md and ARCHITECTURE.md before coding. Implement incremental, reviewable vertical slices. Prefer the smallest workable change over speculative abstractions.
+Read docs/SPEC.md and docs/ARCHITECTURE.md before coding. Implement incremental, reviewable vertical slices. Prefer the smallest workable change over speculative abstractions.
 
 Use React + TypeScript + Vite, chess.js, Chessground, and Vitest unless requirements change. The static deployment target is GitHub Pages under /ChessOpeningExplorer/. Avoid paid services and server dependencies.
 

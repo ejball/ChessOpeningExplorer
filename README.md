@@ -12,7 +12,7 @@ The static build uses `/ChessOpeningExplorer/` as its base path for GitHub Pages
 
 Chessground is GPL-3.0 licensed; see its license in the dependency and the source at https://github.com/lichess-org/chessground. This application's source is available at https://github.com/ejball/ChessOpeningExplorer.
 
-See [SPEC.md](SPEC.md) for product goals and current scope, [ARCHITECTURE.md](ARCHITECTURE.md) for implementation and design notes, [AGENTS.md](AGENTS.md) for coding-agent instructions, and [data/README.md](data/README.md) for data provenance.
+See [SPEC.md](docs/SPEC.md) for product goals and current scope, [ARCHITECTURE.md](docs/ARCHITECTURE.md) for implementation and design notes, [AGENTS.md](AGENTS.md) for coding-agent instructions, and [data/README.md](data/README.md) for data provenance.
 
 ## Pull request previews
 

@@ -273,8 +273,10 @@ function App() {
           >
             <button
               ref={node.id === "root" ? currentMove : undefined}
-              onClick={() => go("root")}
-              disabled={!node.parent}
+              className={node.id === "root" ? "selected" : ""}
+              onClick={() => {
+                if (node.id !== "root") go("root");
+              }}
             >
               Start
             </button>
