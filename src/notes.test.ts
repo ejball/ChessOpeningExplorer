@@ -13,6 +13,21 @@ const completeSnapshot = JSON.parse(completeSnapshotJson) as {
 };
 
 describe("curated explanations", () => {
+  it("shows the bishop's open diagonal in the Grob", () => {
+    const explanation = notes.g4;
+    const segment = explanation.segments.find((item) =>
+      item.text.includes("opens a diagonal for the f1 bishop"),
+    );
+    expect(segment?.shapes).toEqual([
+      { orig: "f1", dest: "h3", brush: "blue" },
+    ]);
+    const game = new Chess();
+    game.move("g4");
+    expect(game.get("f1")?.type).toBe("b");
+    expect(game.get("g2")).toBeUndefined();
+    expect(game.get("h3")).toBeUndefined();
+  });
+
   it("covers every legal first move and every reply to 1. e4 and 1. d4", () => {
     const game = new Chess();
     for (const move of game.moves()) {
