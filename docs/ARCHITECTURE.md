@@ -6,7 +6,7 @@ A static React + TypeScript web application built with Vite, hosted at GitHub Pa
 
 ## Current implementation
 
-- `src/main.tsx` coordinates the board, controls, settings modal, explanation pane, and move list.
+- `src/main.tsx` coordinates the board, controls, appearance toggle, About modal, explanation pane, and move list.
 - `src/tree.ts` manages the variation tree, full FENs, preferred continuations, explored moves, and versioned localStorage session.
 - `src/openings.ts` reads the generated position index; `src/candidates.ts` adds available opening names and sample notes to legal moves. The [data README](../data/README.md) records sources and regeneration.
 - `src/notes.ts` contains four initial sample explanations and their non-mutating board annotations.

@@ -45,7 +45,10 @@ function App() {
   } | null>(null);
   const [saved, setSaved] = useState(true);
   const [theme, setTheme] = useState<Theme>(readTheme);
-  const settings = useRef<HTMLDialogElement>(null);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+  const about = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
   const currentMove = useRef<HTMLButtonElement>(null);
@@ -91,6 +94,12 @@ function App() {
       ? []
       : (note?.segments[active]?.shapes ?? []);
 
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setSystemDark(preference.matches);
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
   useEffect(() => {
     if (theme === "system")
       document.documentElement.removeAttribute("data-theme");
@@ -180,6 +189,7 @@ function App() {
     node.preferred && node.children.includes(node.preferred)
       ? node.preferred
       : node.children[0];
+  const isDark = theme === "system" ? systemDark : theme === "dark";
   const opponentTurn =
     game.turn() === (session.side === "white" ? "b" : "w") &&
     !game.isGameOver();
@@ -219,13 +229,36 @@ function App() {
               ↻
             </button>
             <button
-              onClick={() => settings.current?.showModal()}
-              aria-label="Open settings"
-              aria-haspopup="dialog"
-              aria-controls="settings-dialog"
-              title="Settings"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              aria-label={
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+              }
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="icon-button"
             >
-              ⚙︎
+              {isDark ? (
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+                </svg>
+              ) : (
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => about.current?.showModal()}
+              aria-label="About"
+              aria-haspopup="dialog"
+              aria-controls="about-dialog"
+              title="About"
+              className="icon-button"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 10.5v6m0-9h.01" />
+              </svg>
             </button>
           </div>
         </div>
@@ -461,25 +494,12 @@ function App() {
         )}
       </aside>
       <dialog
-        ref={settings}
-        className="settings-dialog"
-        id="settings-dialog"
-        aria-labelledby="settings-title"
+        ref={about}
+        className="about-dialog"
+        id="about-dialog"
+        aria-labelledby="about-title"
       >
-        <h2 id="settings-title">Settings</h2>
-        <label className="settings-appearance">
-          Appearance{" "}
-          <select
-            aria-label="Appearance"
-            value={theme}
-            onChange={(event) => setTheme(event.target.value as Theme)}
-          >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-        <h2>About</h2>
+        <h2 id="about-title">About</h2>
         <p>
           Explore chess openings and save variations on this device. Opening
           names are bundled with the app.
