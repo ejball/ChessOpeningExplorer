@@ -32,4 +32,13 @@ describe("candidate context", () => {
     expect(candidates.slice(0, contextual.length)).toEqual(contextual);
     expect(candidates.slice(contextual.length)).toEqual(plain);
   });
+
+  it("offers the French advance explanation after Black challenges the center", () => {
+    const game = new Chess();
+    for (const move of ["e4", "e6", "d4", "d5"]) game.move(move);
+    const before = game.fen();
+    const advance = candidatesFor(game).find(({ move }) => move.san === "e5");
+    expect(advance?.explanation).toContain("restricting Black’s kingside knight");
+    expect(game.fen()).toBe(before);
+  });
 });

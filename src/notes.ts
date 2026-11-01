@@ -233,4 +233,365 @@ export const notes: Record<string, Note> = {
       },
     ],
   },
+  "e4 c5 Nf3": {
+    title: "Sicilian Defense: 2. Nf3",
+    sourceRevision: 4623530,
+    segments: [
+      { text: "White develops the knight and " },
+      arrow("supports d4", "f3", "d4"),
+      {
+        text: ". A common plan is d4, meeting ...cxd4 with Nxd4 to open the center.",
+      },
+    ],
+  },
+  "e4 c5 Nf3 d6": {
+    title: "Sicilian Defense: 2...d6",
+    sourceRevision: 4623533,
+    segments: [
+      { text: "Black supports the " },
+      square("c5 pawn", "c5"),
+      {
+        text: " and controls e5. This prepares ...Nf6 while leaving several Sicilian systems available.",
+      },
+    ],
+  },
+  "e4 c5 Nf3 Nc6": {
+    title: "Sicilian Defense: 2...Nc6",
+    sourceRevision: 4607814,
+    segments: [
+      { text: "Black develops the knight and " },
+      arrow("adds pressure on d4", "c6", "d4"),
+      {
+        text: ". Black keeps the option of playing ...d5 in one move rather than committing the d-pawn now.",
+      },
+    ],
+  },
+  "e4 c5 Nf3 e6": {
+    title: "Sicilian Defense: 2...e6",
+    sourceRevision: 4657065,
+    segments: [
+      { text: "Black opens a diagonal for the " },
+      square("dark-squared bishop", "f8"),
+      {
+        text: " and prepares ...d5. White can still pursue the open Sicilian with d4.",
+      },
+    ],
+  },
+  "e4 c5 c3": {
+    title: "Sicilian Defense: Alapin Variation",
+    sourceRevision: 4621235,
+    segments: [
+      { text: "White uses the c-pawn to " },
+      arrow("support d4", "c3", "d4"),
+      {
+        text: ". If Black exchanges on d4, White may be able to recapture with the c-pawn and establish a broad center.",
+      },
+    ],
+  },
+  "e4 e6 d4": {
+    title: "French Defense: 2. d4",
+    sourceRevision: 4611132,
+    segments: [
+      { text: "White builds a " },
+      square("two-pawn center", "d4"),
+      {
+        text: " and opens lines for development. Black has prepared ...d5 to challenge it.",
+      },
+    ],
+  },
+  "e4 e6 d4 d5": {
+    title: "French Defense: 2...d5",
+    sourceRevision: 4621121,
+    segments: [
+      { text: "Black " },
+      arrow("attacks the e4 pawn", "d5", "e4"),
+      {
+        text: ". White can advance it, exchange on d5, or develop a piece to support the center.",
+      },
+    ],
+  },
+  "e4 e6 d4 d5 e5": {
+    title: "French Defense: Advance Variation",
+    sourceRevision: 4607358,
+    segments: [
+      { text: "White gains space and " },
+      arrow("controls f6", "e5", "f6"),
+      {
+        text: ", restricting Black’s kingside knight. Black commonly challenges the base of the pawn chain with ...c5.",
+      },
+    ],
+  },
+  "e4 c6 d4": {
+    title: "Caro-Kann Defense: 2. d4",
+    sourceRevision: 4529821,
+    segments: [
+      { text: "White establishes " },
+      square("a second central pawn", "d4"),
+      {
+        text: ". Black usually follows through with ...d5, supported by the c6 pawn.",
+      },
+    ],
+  },
+  "e4 c6 d4 d5": {
+    title: "Caro-Kann Defense: 2...d5",
+    sourceRevision: 4631963,
+    segments: [
+      { text: "Black " },
+      arrow("attacks e4", "d5", "e4"),
+      {
+        text: " with the c6 pawn supporting d5. White can advance, exchange, or develop a defender.",
+      },
+    ],
+  },
+  "e4 c6 d4 d5 e5": {
+    title: "Caro-Kann Defense: Advance Variation",
+    sourceRevision: 4655309,
+    segments: [
+      { text: "White advances the " },
+      square("e-pawn", "e5"),
+      {
+        text: " to gain space. Black often develops the c8 bishop before playing ...e6, or immediately challenges the center with ...c5.",
+      },
+    ],
+  },
+  "e4 d5 exd5": {
+    title: "Scandinavian Defense: 2. exd5",
+    sourceRevision: 4641008,
+    segments: [
+      { text: "White captures in the center. Black can recover the " },
+      square("pawn on d5", "d5"),
+      {
+        text: " immediately with the queen or delay the recapture while developing a knight.",
+      },
+    ],
+  },
+  "e4 d5 exd5 Qxd5": {
+    title: "Scandinavian Defense: 2...Qxd5",
+    sourceRevision: 4659435,
+    segments: [
+      { text: "Black recovers the pawn with the " },
+      square("queen", "d5"),
+      {
+        text: ". White can develop Nc3 with an attack on the queen, gaining time as it moves away.",
+      },
+    ],
+  },
+  "e4 d5 exd5 Qxd5 Nc3": {
+    title: "Scandinavian Defense: 3. Nc3",
+    sourceRevision: 4659402,
+    segments: [
+      { text: "White develops a knight while " },
+      arrow("attacking the queen", "c3", "d5"),
+      {
+        text: ". Black must choose a safe square for the queen, commonly a5, d6, or d8.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 Bc4 Bc5": {
+    title: "Italian Game: Giuoco Piano",
+    sourceRevision: 4604454,
+    segments: [
+      { text: "Black develops the " },
+      square("bishop to c5", "c5"),
+      {
+        text: " and keeps the knight free to develop later. White can prepare a central d4 advance or choose a quieter setup with d3.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 Bc4 Nf6": {
+    title: "Italian Game: Two Knights Defense",
+    sourceRevision: 4678820,
+    segments: [
+      { text: "Black develops a knight and " },
+      arrow("attacks e4", "f6", "e4"),
+      {
+        text: ". White can defend the pawn or counterattack, for example by directing a knight toward f7.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 Bb5 a6": {
+    title: "Ruy Lopez: Morphy Defense",
+    sourceRevision: 4612044,
+    segments: [
+      { text: "Black’s a-pawn " },
+      arrow("attacks the bishop", "a6", "b5"),
+      {
+        text: ". White must decide whether to exchange on c6 or retreat and preserve the bishop.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 Bb5 a6 Ba4": {
+    title: "Ruy Lopez: 4. Ba4",
+    sourceRevision: 4604055,
+    segments: [
+      { text: "White preserves the bishop and keeps " },
+      arrow("pressure on the c6 knight", "a4", "c6"),
+      {
+        text: ", a defender of e5. Black can develop the kingside or later challenge the bishop with ...b5.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6": {
+    title: "Ruy Lopez: 4...Nf6",
+    sourceRevision: 4637921,
+    segments: [
+      { text: "Black develops and " },
+      arrow("attacks e4", "f6", "e4"),
+      {
+        text: ". White can defend the pawn or continue developing; castling is a common choice.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 Nc6 d4": {
+    title: "Scotch Game",
+    sourceRevision: 4670398,
+    segments: [
+      { text: "White immediately " },
+      arrow("challenges e5", "d4", "e5"),
+      { text: " and aims to open the center. Black commonly exchanges on d4." },
+    ],
+  },
+  "e4 e5 Nf3 Nf6": {
+    title: "Petrov Defense",
+    sourceRevision: 4669874,
+    segments: [
+      { text: "Instead of defending e5, Black develops and " },
+      arrow("counterattacks e4", "f6", "e4"),
+      {
+        text: ". Both central pawns are under attack, and White can capture on e5 or defend their own pawn.",
+      },
+    ],
+  },
+  "e4 e5 Nf3 d6": {
+    title: "Philidor Defense",
+    sourceRevision: 4637098,
+    segments: [
+      { text: "Black " },
+      arrow("defends e5", "d6", "e5"),
+      {
+        text: " with a pawn. The structure is solid, though the d6 pawn limits the f8 bishop and Black has yet to develop a piece.",
+      },
+    ],
+  },
+  "e4 e5 Nc3": {
+    title: "Vienna Game",
+    sourceRevision: 4595952,
+    segments: [
+      { text: "White develops a knight and " },
+      arrow("supports e4", "c3", "e4"),
+      {
+        text: ". Unlike Nf3, this leaves the f-pawn free to advance in some Vienna lines.",
+      },
+    ],
+  },
+  "d4 d5 c4 e6": {
+    title: "Queen’s Gambit Declined",
+    sourceRevision: 4654559,
+    segments: [
+      { text: "Black " },
+      arrow("supports d5", "e6", "d5"),
+      {
+        text: " and opens a diagonal for the f8 bishop. The e6 pawn also blocks the c8 bishop, which Black will need to develop later.",
+      },
+    ],
+  },
+  "d4 d5 c4 c6": {
+    title: "Slav Defense",
+    sourceRevision: 4613572,
+    segments: [
+      { text: "Black uses the c-pawn to " },
+      arrow("support d5", "c6", "d5"),
+      {
+        text: ". This leaves the c8 bishop’s diagonal open, though the pawn occupies the knight’s usual c6 square.",
+      },
+    ],
+  },
+  "d4 d5 c4 dxc4": {
+    title: "Queen’s Gambit Accepted",
+    sourceRevision: 4611045,
+    segments: [
+      { text: "Black accepts the offered " },
+      square("c4 pawn", "c4"),
+      {
+        text: ". White can work to recover it while building a center; trying to hold the pawn can cost Black time.",
+      },
+    ],
+  },
+  "d4 Nf6 c4 e6": {
+    title: "Indian Defense: 2...e6",
+    sourceRevision: 4520642,
+    segments: [
+      { text: "Black opens the " },
+      square("f8 bishop’s", "f8"),
+      {
+        text: " diagonal and strengthens control of d5. The pawn also restricts the c8 bishop, so its development remains a question.",
+      },
+    ],
+  },
+  "d4 Nf6 c4 e6 Nc3": {
+    title: "Indian Defense: 3. Nc3",
+    sourceRevision: 4610156,
+    segments: [
+      { text: "White develops the knight and " },
+      arrow("supports e4", "c3", "e4"),
+      {
+        text: ". Black can pin the knight with ...Bb4 or choose a different way to contest the center.",
+      },
+    ],
+  },
+  "d4 Nf6 c4 e6 Nc3 Bb4": {
+    title: "Nimzo-Indian Defense",
+    sourceRevision: 4637909,
+    segments: [
+      { text: "Black " },
+      arrow("pins the c3 knight", "b4", "c3"),
+      {
+        text: " to the king. This makes it harder for White to rely on that knight when contesting e4.",
+      },
+    ],
+  },
+  "d4 Nf6 c4 g6": {
+    title: "King’s Indian Setup: 2...g6",
+    sourceRevision: 4659986,
+    segments: [
+      { text: "Black prepares to develop the " },
+      square("bishop on f8", "f8"),
+      {
+        text: " to g7, where it can influence the long diagonal and support the king after castling.",
+      },
+    ],
+  },
+  "d4 Nf6 c4 g6 Nc3": {
+    title: "King’s Indian Setup: 3. Nc3",
+    sourceRevision: 4659994,
+    segments: [
+      { text: "White develops and " },
+      arrow("prepares e4", "c3", "e4"),
+      {
+        text: ", keeping several central setups available. Black can complete the bishop’s fianchetto with ...Bg7.",
+      },
+    ],
+  },
+  "d4 Nf6 Nf3": {
+    title: "Indian Defense: 2. Nf3",
+    sourceRevision: 4603608,
+    segments: [
+      { text: "White develops the " },
+      square("kingside knight", "f3"),
+      {
+        text: " without committing the c-pawn. White can choose a central setup after seeing Black’s next move.",
+      },
+    ],
+  },
+  "c4 e5": {
+    title: "English Opening: 1...e5",
+    sourceRevision: 4337145,
+    segments: [
+      { text: "Black claims central space and " },
+      arrow("controls d4", "e5", "d4"),
+      {
+        text: ". The pawn arrangement resembles a Sicilian with colors reversed, though White has the next move.",
+      },
+    ],
+  },
 };
