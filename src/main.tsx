@@ -543,16 +543,18 @@ function App() {
               )}
             </div>
           </div>
-          {explanationOverflows && (
-            <button
-              className="show-more"
-              aria-expanded={explanationExpanded}
-              aria-controls="explanation-text"
-              onClick={() => setExplanationExpanded((expanded) => !expanded)}
-            >
-              {explanationExpanded ? "Show less" : "Show more"}
-            </button>
-          )}
+          <div className="show-more-slot">
+            {explanationOverflows && (
+              <button
+                className="show-more"
+                aria-expanded={explanationExpanded}
+                aria-controls="explanation-text"
+                onClick={() => setExplanationExpanded((expanded) => !expanded)}
+              >
+                {explanationExpanded ? "Show less" : "Show more"}
+              </button>
+            )}
+          </div>
         </section>
         <section className="card reply-card" aria-label="Next moves">
           <div className="move-visibility">

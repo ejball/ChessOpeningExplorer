@@ -1104,7 +1104,11 @@ aside.details-pane > .reply-card {
 .explanation-content {
   display: flow-root;
 }
+.show-more-slot {
+  height: 26px;
+}
 .show-more {
+  height: 26px;
   padding: 3px 0;
   border: 0;
   background: none;
