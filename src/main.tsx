@@ -154,7 +154,7 @@ function App() {
       const bottom = viewport.getBoundingClientRect().top + limit;
       // Do not tab into controls hidden below the collapsed region.
       content
-        .querySelectorAll<HTMLElement>("button.annotation, a.note-source-link")
+        .querySelectorAll<HTMLElement>(".annotation, a.note-source-link")
         .forEach((control) => {
           control.tabIndex =
             explanationExpanded ||
@@ -507,9 +507,11 @@ function App() {
                   <p>
                     {note.segments.map((segment, i) =>
                       segment.shapes ? (
-                        <button
+                        <span
                           key={i}
                           className="annotation"
+                          role="button"
+                          tabIndex={0}
                           aria-pressed={pinned === i}
                           onPointerEnter={(event) => {
                             if (event.pointerType === "mouse") setHovered(i);
@@ -525,9 +527,18 @@ function App() {
                           onClick={() =>
                             setPinned((previous) => (previous === i ? null : i))
                           }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              if (!event.repeat)
+                                setPinned((previous) =>
+                                  previous === i ? null : i,
+                                );
+                            }
+                          }}
                         >
                           {segment.text}
-                        </button>
+                        </span>
                       ) : (
                         <span key={i}>{segment.text}</span>
                       ),
