@@ -6,6 +6,7 @@ export type Analysis = {
   depth: number;
   moves: EngineMove[];
   elapsedMs?: number;
+  canContinue?: boolean;
 };
 
 // UCI scores are from the perspective of the side to move at the root.

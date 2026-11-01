@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Iterations, parseInfo, type Analysis } from "./engine";
 
 const SEARCH_MS = 3000;
@@ -11,18 +11,23 @@ export function useEngine(
   whiteToMove: boolean,
   isGameOver: boolean,
   retry: number,
-): Analysis | undefined {
+): { analysis: Analysis | undefined; thinkMore: () => void } {
   const [analysis, setAnalysis] = useState<Analysis>();
+  const continueSearch = useRef<(() => void) | null>(null);
   const line = history.join(" ");
+
   useEffect(() => {
     if (isGameOver || legalMoveCount === 0) return;
     let worker: Worker;
     let live = true;
-    let phase: "uci" | "ready" | "search" = "uci";
+    let phase: "uci" | "ready" | "search" | "idle" = "uci";
     let bestDepth = 0;
     let hasComplete = false;
     let started = 0;
-    const iterations = new Iterations(legalMoveCount);
+    let totalElapsed = 0;
+    let iterations = new Iterations(legalMoveCount);
+    let timer: number;
+
     setAnalysis({ position, status: "loading", depth: 0, moves: [] });
     try {
       worker = new Worker(
@@ -32,23 +37,50 @@ export function useEngine(
       setAnalysis({ position, status: "error", depth: 0, moves: [] });
       return;
     }
-    const timer = window.setTimeout(() => {
-      if (!live) return;
-      live = false;
-      worker.terminate();
+
+    function armTimeout() {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        if (!live) return;
+        live = false;
+        continueSearch.current = null;
+        worker.terminate();
+        const elapsedMs =
+          totalElapsed + (phase === "search" ? performance.now() - started : 0);
+        setAnalysis((previous) =>
+          previous?.position === position && previous.moves.length
+            ? {
+                ...previous,
+                status: "incomplete",
+                canContinue: false,
+                elapsedMs,
+              }
+            : { position, status: "error", depth: 0, moves: [] },
+        );
+      }, LOAD_TIMEOUT_MS);
+    }
+
+    function startSearch() {
+      if (!live || phase !== "idle") return;
+      phase = "search";
+      iterations = new Iterations(legalMoveCount);
+      started = performance.now();
+      armTimeout();
       setAnalysis((previous) =>
-        previous?.position === position && previous.moves.length
-          ? {
-              ...previous,
-              status: "incomplete",
-              elapsedMs: started ? performance.now() - started : undefined,
-            }
-          : { position, status: "error", depth: 0, moves: [] },
+        previous?.position === position
+          ? { ...previous, status: "analyzing", canContinue: false }
+          : { position, status: "analyzing", depth: 0, moves: [] },
       );
-    }, LOAD_TIMEOUT_MS);
+      worker.postMessage(`position startpos${line ? ` moves ${line}` : ""}`);
+      worker.postMessage(`go movetime ${SEARCH_MS}`);
+    }
+    continueSearch.current = startSearch;
+    armTimeout();
+
     worker.onerror = () => {
       if (!live) return;
       live = false;
+      continueSearch.current = null;
       clearTimeout(timer);
       worker.terminate();
       setAnalysis({ position, status: "error", depth: 0, moves: [] });
@@ -62,11 +94,8 @@ export function useEngine(
         worker.postMessage("setoption name Hash value 16");
         worker.postMessage("isready");
       } else if (message === "readyok" && phase === "ready") {
-        phase = "search";
-        started = performance.now();
-        setAnalysis({ position, status: "analyzing", depth: 0, moves: [] });
-        worker.postMessage(`position startpos${line ? ` moves ${line}` : ""}`);
-        worker.postMessage(`go movetime ${SEARCH_MS}`);
+        phase = "idle";
+        startSearch();
       } else if (phase === "search" && message.startsWith("info ")) {
         const info = parseInfo(message, whiteToMove);
         if (!info || info.depth < bestDepth) return;
@@ -79,25 +108,30 @@ export function useEngine(
             status: "analyzing",
             depth: info.depth,
             moves: complete,
+            elapsedMs: totalElapsed + performance.now() - started,
           });
         }
       } else if (phase === "search" && message.startsWith("bestmove ")) {
-        live = false;
+        phase = "idle";
         clearTimeout(timer);
-        worker.terminate();
+        totalElapsed += performance.now() - started;
+        // Keep the idle worker and its hash table for an explicitly requested
+        // further search. No analysis runs while it is idle.
         setAnalysis((previous) =>
           previous?.position === position && hasComplete
             ? {
                 ...previous,
                 status: "ready",
-                elapsedMs: performance.now() - started,
+                elapsedMs: totalElapsed,
+                canContinue: true,
               }
             : {
                 position,
                 status: "incomplete",
                 depth: 0,
                 moves: [],
-                elapsedMs: performance.now() - started,
+                elapsedMs: totalElapsed,
+                canContinue: true,
               },
         );
       }
@@ -105,9 +139,15 @@ export function useEngine(
     worker.postMessage("uci");
     return () => {
       live = false;
+      if (continueSearch.current === startSearch) continueSearch.current = null;
       clearTimeout(timer);
       worker.terminate();
     };
   }, [position, line, legalMoveCount, whiteToMove, isGameOver, retry]);
-  return analysis?.position === position && !isGameOver ? analysis : undefined;
+
+  return {
+    analysis:
+      analysis?.position === position && !isGameOver ? analysis : undefined,
+    thinkMore: () => continueSearch.current?.(),
+  };
 }

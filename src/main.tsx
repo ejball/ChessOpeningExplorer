@@ -65,7 +65,7 @@ function App() {
   const note = notes[game.history().join(" ")];
   const legalMoves = game.moves({ verbose: true });
   const history = game.history({ verbose: true }).map((move) => move.lan);
-  const analysis = useEngine(
+  const { analysis, thinkMore } = useEngine(
     node.id,
     history,
     legalMoves.length,
@@ -268,6 +268,22 @@ function App() {
                       ? "!"
                       : "…"}
               </span>
+            )}
+            {!game.isGameOver() && (
+              <button
+                className="icon-button"
+                aria-label="Think more"
+                title={
+                  analysis?.status === "analyzing" ? "Analyzing…" : "Think more"
+                }
+                disabled={!analysis?.canContinue}
+                onClick={thinkMore}
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <circle cx="10.5" cy="10.5" r="6.5" />
+                  <path d="m15.5 15.5 4.5 4.5M10.5 7.5v6m-3-3h6" />
+                </svg>
+              </button>
             )}
             <button
               onClick={() =>
