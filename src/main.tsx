@@ -8,7 +8,7 @@ import type { Move, Square } from "chess.js";
 import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
 import { candidatesFor } from "./candidates";
-import { formatScore, type Score } from "./engine";
+import { boardScore, formatScore, scoreSide } from "./engine";
 import { useEngine } from "./useEngine";
 import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
 import {
@@ -24,12 +24,6 @@ import {
 } from "./tree";
 import "chessground/assets/chessground.base.css";
 import "./style.css";
-
-function boardScore(score: Score): string {
-  if (score.kind === "mate") return formatScore(score);
-  if (score.value === 0) return "0.00";
-  return `${score.value > 0 ? "White" : "Black"} +${(Math.abs(score.value) / 100).toFixed(2)}`;
-}
 
 type Theme = "system" | "light" | "dark";
 function readTheme(): Theme {
@@ -227,6 +221,17 @@ function App() {
     );
   }
   const positionScore = analysis?.moves[0]?.score;
+  const engineTooltip = [
+    "Stockfish",
+    analysis?.depth ? `depth ${analysis.depth}` : "starting",
+    analysis?.status === "analyzing" ? "analyzing" : "",
+    analysis?.status === "incomplete" ? "incomplete" : "",
+    analysis?.status === "ready" && analysis.elapsedMs
+      ? `${(analysis.elapsedMs / 1000).toFixed(1)}s`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const opponentTurn =
     game.turn() === (session.side === "white" ? "b" : "w") &&
     !game.isGameOver();
@@ -238,12 +243,18 @@ function App() {
     <main>
       <section className="play" aria-label="Chess board and navigation">
         <div className="controls">
-          <div className="status-group">
-            <strong>
-              <i /> {status}
-            </strong>
+          <strong>
+            <i /> {status}
+          </strong>
+          <div className="control-buttons">
             {!game.isGameOver() && (
-              <span className="engine-evaluation" aria-live="polite">
+              <span
+                className={`engine-evaluation ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
+                title={engineTooltip}
+                aria-label={`${positionScore ? boardScore(positionScore) : "Analyzing"}. ${engineTooltip}`}
+                aria-live="polite"
+                tabIndex={0}
+              >
                 {positionScore
                   ? boardScore(positionScore)
                   : analysis?.status === "error"
@@ -251,19 +262,8 @@ function App() {
                     : analysis?.status === "incomplete"
                       ? "Analysis incomplete"
                       : "Analyzing…"}
-                <span className="engine-detail">
-                  {analysis?.depth ? ` · depth ${analysis.depth}` : ""}
-                  {analysis?.status === "analyzing" && positionScore
-                    ? " · analyzing"
-                    : ""}
-                  {analysis?.status === "incomplete" && positionScore
-                    ? " · incomplete"
-                    : ""}
-                </span>
               </span>
             )}
-          </div>
-          <div className="control-buttons">
             <button
               onClick={() =>
                 setSession((s) => ({
@@ -476,17 +476,6 @@ function App() {
           )}
         </section>
         <section className="card reply-card" aria-label="Next moves">
-          {!game.isGameOver() && analysis?.status !== "error" && (
-            <p className="analysis-meta">
-              Stockfish{" "}
-              {analysis?.depth ? `· depth ${analysis.depth}` : "· starting"}
-              {analysis?.status === "analyzing" ? " · analyzing" : ""}
-              {analysis?.status === "incomplete" ? " · incomplete" : ""}
-              {analysis?.status === "ready" && analysis.elapsedMs
-                ? ` · ${(analysis.elapsedMs / 1000).toFixed(1)}s`
-                : ""}
-            </p>
-          )}
           <div
             className="move-visibility"
             role="group"
@@ -526,9 +515,6 @@ function App() {
           ) : movesVisible ? (
             <p className="muted">
               Choose a move for {game.turn() === "w" ? "white" : "black"}.
-              {analysis?.moves.length
-                ? " Engine scores are from White’s perspective."
-                : ""}
             </p>
           ) : (
             <p className="muted">
@@ -560,21 +546,30 @@ function App() {
                     );
                   }}
                 >
-                  <strong>{move.san}</strong>
-                  {(opening || explanation) && (
-                    <span className="candidate-details">
+                  <span className="candidate-main">
+                    <span className="candidate-heading">
+                      <strong>{move.san}</strong>
                       {opening && (
                         <span className="candidate-opening">
                           {opening.name}
                         </span>
                       )}
-                      {explanation && (
-                        <span className="candidate-explanation">
-                          {explanation}
+                      {explored.has(move.lan) && (
+                        <span
+                          className="explored-marker"
+                          title="Previously explored"
+                        >
+                          <span aria-hidden="true">✓</span>
+                          <span className="sr-only">Previously explored</span>
                         </span>
                       )}
                     </span>
-                  )}
+                    {explanation && (
+                      <span className="candidate-explanation">
+                        {explanation}
+                      </span>
+                    )}
+                  </span>
                   {engineMoves.get(move.lan) && (
                     <span
                       className="move-score"
@@ -583,19 +578,6 @@ function App() {
                       {formatScore(engineMoves.get(move.lan)!.score)}
                     </span>
                   )}
-                  <span
-                    className="explored-marker"
-                    title={
-                      explored.has(move.lan) ? "Previously explored" : undefined
-                    }
-                  >
-                    <span aria-hidden="true">
-                      {explored.has(move.lan) ? "✓" : ""}
-                    </span>
-                    {explored.has(move.lan) && (
-                      <span className="sr-only">Previously explored</span>
-                    )}
-                  </span>
                 </button>
               ))}
             </div>

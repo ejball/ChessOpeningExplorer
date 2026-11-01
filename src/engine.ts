@@ -43,6 +43,17 @@ export function formatScore(score: Score): string {
   return `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
 }
 
+// Board evaluation names the advantaged side and uses a positive magnitude.
+export function boardScore(score: Score): string {
+  if (score.kind === "mate") return formatScore(score);
+  if (score.value === 0) return "0.00";
+  return `${score.value > 0 ? "White" : "Black"} +${(Math.abs(score.value) / 100).toFixed(2)}`;
+}
+
+export function scoreSide(score: Score): "white" | "black" | "neutral" {
+  return score.value > 0 ? "white" : score.value < 0 ? "black" : "neutral";
+}
+
 // Publish only complete MultiPV iterations, so all moves have the same depth.
 export class Iterations {
   private depths = new Map<number, Map<number, EngineMove>>();

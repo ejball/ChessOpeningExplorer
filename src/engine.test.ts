@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatScore, Iterations, parseInfo } from "./engine";
+import {
+  boardScore,
+  formatScore,
+  Iterations,
+  parseInfo,
+  scoreSide,
+} from "./engine";
 
 describe("Stockfish analysis", () => {
   it("converts UCI scores to White's perspective and parses promotions", () => {
@@ -16,6 +22,14 @@ describe("Stockfish analysis", () => {
     ).toEqual({ kind: "mate", value: 3 });
     expect(formatScore({ kind: "mate", value: -3 })).toBe("Black mates in 3");
     expect(formatScore({ kind: "cp", value: -35 })).toBe("-0.35");
+  });
+
+  it("shows a positive magnitude and the advantaged side on the board", () => {
+    expect(boardScore({ kind: "cp", value: -125 })).toBe("Black +1.25");
+    expect(scoreSide({ kind: "cp", value: -125 })).toBe("black");
+    expect(boardScore({ kind: "cp", value: 35 })).toBe("White +0.35");
+    expect(scoreSide({ kind: "cp", value: 0 })).toBe("neutral");
+    expect(boardScore({ kind: "mate", value: -3 })).toBe("Black mates in 3");
   });
 
   it("ignores bounds and incomplete lines", () => {

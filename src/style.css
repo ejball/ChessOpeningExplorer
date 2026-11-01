@@ -925,34 +925,12 @@ h2,
   stroke-linejoin: round;
 }
 
-.status-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
-}
-.engine-evaluation {
-  color: var(--muted);
-  font-size: 12px;
-}
 .replies button .move-score {
   margin-left: auto;
   flex: none;
   color: var(--text);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-}
-.replies button .move-score + .explored-marker {
-  margin-left: 4px;
-}
-.reply-card p.analysis-meta {
-  font-size: 12px;
-  color: var(--muted);
-}
-@media (max-width: 500px) {
-  .engine-detail {
-    display: none;
-  }
 }
 
 .move-visibility {
@@ -971,4 +949,60 @@ h2,
 }
 .move-visibility input {
   accent-color: var(--selected);
+}
+
+/* Keep the evaluation next to the controls and use a consistent icon width. */
+.controls .control-buttons button {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+}
+.engine-evaluation {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.engine-evaluation.score-white {
+  color: #182019;
+  background: #fff;
+  border-color: #b5bdb4;
+}
+.engine-evaluation.score-black {
+  color: #fff;
+  background: #202522;
+  border-color: #707a71;
+}
+.engine-evaluation.score-neutral,
+.engine-evaluation.score-pending {
+  color: var(--text);
+  background: var(--surface-soft);
+}
+.candidate-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.candidate-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 5px;
+}
+.replies button .explored-marker {
+  display: inline;
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--accent);
+  font-size: 14px;
+  line-height: inherit;
+}
+.replies button .candidate-heading strong {
+  font-size: 15px;
 }
