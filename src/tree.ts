@@ -55,6 +55,21 @@ export function fresh(side: Session["side"] = "white"): Session {
     "root",
   );
 }
+// A position can be reached through more than one branch. Mark a move explored
+// if it was played from any equivalent position in this session.
+export function exploredMoves(s: Session): Set<string> {
+  const current = key(s.nodes[s.current].fen);
+  const moves = new Set<string>();
+  for (const node of Object.values(s.nodes)) {
+    if (!node.children.length || key(node.fen) !== current) continue;
+    for (const id of node.children) {
+      const child = s.nodes[id];
+      if (child.from && child.to)
+        moves.add(child.from + child.to + (child.promotion || ""));
+    }
+  }
+  return moves;
+}
 // Follow the continuation most recently chosen at each position.
 export function preferredLine(s: Session, start = s.current): Node[] {
   const line: Node[] = [];

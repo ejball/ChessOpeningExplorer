@@ -6,13 +6,13 @@ A browser-based chess opening explorer for personal learning. Explore legal move
 
 Use Node.js 22 or newer and npm. Run `npm ci`, then `npm run dev`. Run `npm run typecheck`, `npm test`, and `npm run build` to validate changes. The app stores its exploration session in browser localStorage; Restart clears that session's tree and position visits.
 
-The arrow beside Forward lets you revisit a different continuation; the move line shows the current path and the most recently selected continuation. On your turn, use Show moves to reveal legal moves. Hover an underlined explanation to preview its idea, or click or tap it to keep the annotation visible. Hover a reply to preview it on the board. Use the gear for appearance settings.
+The move line and chevrons navigate the current path and its most recently selected continuation. A dot in the move list marks a move already explored from the same position. On your turn, use Show moves to reveal legal moves. Hover an underlined explanation to preview its idea, or click or tap it to keep the annotation visible. Hover a reply to preview it on the board. Use the sun/moon button to switch appearance and the information button to view source acknowledgments. The initial appearance follows the system setting.
 
 The static build uses `/ChessOpeningExplorer/` as its base path for GitHub Pages. In repository Settings → Pages, select GitHub Actions as the deployment source.
 
 Chessground is GPL-3.0 licensed; see its license in the dependency and the source at https://github.com/lichess-org/chessground. This application's source is available at https://github.com/ejball/ChessOpeningExplorer.
 
-See [SPEC.md](SPEC.md), [ARCHITECTURE.md](ARCHITECTURE.md), and [AGENTS.md](AGENTS.md) for product and development guidance.
+See [SPEC.md](docs/SPEC.md) for product goals and current scope, [ARCHITECTURE.md](docs/ARCHITECTURE.md) for implementation and design notes, [AGENTS.md](AGENTS.md) for coding-agent instructions, and [data/README.md](data/README.md) for data provenance.
 
 ## Pull request previews
 

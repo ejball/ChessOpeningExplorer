@@ -9,6 +9,7 @@ import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
 import { candidatesFor } from "./candidates";
 import {
+  exploredMoves,
   fresh,
   gameAt,
   load,
@@ -44,6 +45,9 @@ function App() {
   } | null>(null);
   const [saved, setSaved] = useState(true);
   const [theme, setTheme] = useState<Theme>(readTheme);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
   const about = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
@@ -64,6 +68,7 @@ function App() {
   )
     path.unshift(current);
   const forwardMoves = preferredLine(session);
+  const explored = exploredMoves(session);
   const active = hovered ?? pinned;
   const shapes: DrawShape[] = reply
     ? [
@@ -89,6 +94,12 @@ function App() {
       ? []
       : (note?.segments[active]?.shapes ?? []);
 
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setSystemDark(preference.matches);
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
   useEffect(() => {
     if (theme === "system")
       document.documentElement.removeAttribute("data-theme");
@@ -178,6 +189,7 @@ function App() {
     node.preferred && node.children.includes(node.preferred)
       ? node.preferred
       : node.children[0];
+  const isDark = theme === "system" ? systemDark : theme === "dark";
   const opponentTurn =
     game.turn() === (session.side === "white" ? "b" : "w") &&
     !game.isGameOver();
@@ -191,49 +203,6 @@ function App() {
           </strong>
           <div className="control-buttons">
             <button
-              disabled={!node.parent}
-              onClick={() => node.parent && go(node.parent)}
-            >
-              ← Back
-            </button>
-            <div className="forward-group">
-              <button
-                disabled={!preferred}
-                onClick={() => preferred && go(preferred)}
-              >
-                Forward →
-              </button>
-              <details className="menu forward-menu">
-                <summary
-                  aria-label="Choose a forward move"
-                  title="Choose a forward move"
-                  aria-disabled={!node.children.length}
-                >
-                  ▾
-                </summary>
-                <div className="menu-content">
-                  {node.children.length ? (
-                    node.children.map((id) => (
-                      <button
-                        key={id}
-                        onClick={(event) => {
-                          event.currentTarget
-                            .closest("details")
-                            ?.removeAttribute("open");
-                          go(id);
-                        }}
-                      >
-                        {session.nodes[id].san}
-                        {id === preferred ? " · most recent" : ""}
-                      </button>
-                    ))
-                  ) : (
-                    <span>No forward moves</span>
-                  )}
-                </div>
-              </details>
-            </div>
-            <button
               onClick={() =>
                 setSession((s) => ({
                   ...s,
@@ -246,6 +215,8 @@ function App() {
               ⇅
             </button>
             <button
+              aria-label="Restart"
+              title="Restart"
               onClick={() => {
                 if (
                   window.confirm(
@@ -255,39 +226,40 @@ function App() {
                   setSession(fresh(session.side));
               }}
             >
-              Restart
+              ↻
             </button>
-            <details className="menu settings-menu">
-              <summary
-                aria-label="Appearance settings"
-                title="Appearance settings"
-              >
-                ⚙
-              </summary>
-              <div className="menu-content">
-                <label>
-                  Appearance{" "}
-                  <select
-                    value={theme}
-                    onChange={(event) => setTheme(event.target.value as Theme)}
-                  >
-                    <option value="system">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                  </select>
-                </label>
-                <button
-                  onClick={(event) => {
-                    event.currentTarget
-                      .closest("details")
-                      ?.removeAttribute("open");
-                    about.current?.showModal();
-                  }}
-                >
-                  About
-                </button>
-              </div>
-            </details>
+            <button
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+              aria-label={
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+              }
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="icon-button"
+            >
+              {isDark ? (
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+                </svg>
+              ) : (
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => about.current?.showModal()}
+              aria-label="About"
+              aria-haspopup="dialog"
+              aria-controls="about-dialog"
+              title="About"
+              className="icon-button"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 10.5v6m0-9h.01" />
+              </svg>
+            </button>
           </div>
         </div>
         <div className="board-wrap">
@@ -326,44 +298,72 @@ function App() {
             ))}
           </div>
         )}
-        <nav
-          ref={moveLine}
-          className="move-line"
-          aria-label="Current move history"
-        >
-          <button
-            ref={node.id === "root" ? currentMove : undefined}
-            onClick={() => go("root")}
-            disabled={!node.parent}
+        <div className="board-footer">
+          <nav
+            ref={moveLine}
+            className="move-line"
+            aria-label="Current move history"
           >
-            Start
-          </button>
-          {path.map((move, index) => (
             <button
-              key={move.id}
-              ref={move.id === node.id ? currentMove : undefined}
-              className={move.id === node.id ? "selected" : ""}
-              onClick={() => go(move.id)}
+              ref={node.id === "root" ? currentMove : undefined}
+              className={node.id === "root" ? "selected" : ""}
+              onClick={() => {
+                if (node.id !== "root") go("root");
+              }}
             >
-              {index % 2 === 0 ? `${Math.floor(index / 2) + 1}. ` : ""}
-              {move.san}
+              Start
             </button>
-          ))}
-          {forwardMoves.map((move, index) => {
-            const ply = path.length + index;
-            return (
+            {path.map((move, index) => (
               <button
                 key={move.id}
-                className="future-move"
+                ref={move.id === node.id ? currentMove : undefined}
+                className={move.id === node.id ? "selected" : ""}
                 onClick={() => go(move.id)}
-                aria-label={`Forward to ${move.san}`}
               >
-                {ply % 2 === 0 ? `${Math.floor(ply / 2) + 1}. ` : ""}
+                {index % 2 === 0 ? `${Math.floor(index / 2) + 1}. ` : ""}
                 {move.san}
               </button>
-            );
-          })}
-        </nav>
+            ))}
+            {forwardMoves.map((move, index) => {
+              const ply = path.length + index;
+              return (
+                <button
+                  key={move.id}
+                  className="future-move"
+                  onClick={() => go(move.id)}
+                  aria-label={`Forward to ${move.san}`}
+                >
+                  {ply % 2 === 0 ? `${Math.floor(ply / 2) + 1}. ` : ""}
+                  {move.san}
+                </button>
+              );
+            })}
+          </nav>
+          <div className="navigation-buttons" aria-label="Move navigation">
+            <button
+              className="navigation-button"
+              aria-label="Back"
+              title="Back"
+              disabled={!node.parent}
+              onClick={() => node.parent && go(node.parent)}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m15 5-7 7 7 7" />
+              </svg>
+            </button>
+            <button
+              className="navigation-button"
+              aria-label="Forward"
+              title="Forward"
+              disabled={!preferred}
+              onClick={() => preferred && go(preferred)}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m9 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </section>
       <aside aria-label="Position details">
         <section className="card explanation" aria-label="Position explanation">
@@ -475,6 +475,15 @@ function App() {
                       )}
                     </span>
                   )}
+                  {explored.has(move.lan) && (
+                    <span
+                      className="explored-marker"
+                      title="Previously explored"
+                    >
+                      <span aria-hidden="true">●</span>
+                      <span className="sr-only">Previously explored</span>
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -487,9 +496,10 @@ function App() {
       <dialog
         ref={about}
         className="about-dialog"
+        id="about-dialog"
         aria-labelledby="about-title"
       >
-        <h2 id="about-title">About Chess Opening Explorer</h2>
+        <h2 id="about-title">About</h2>
         <p>
           Explore chess openings and save variations on this device. Opening
           names are bundled with the app.
