@@ -10,6 +10,7 @@ import { notes } from "./notes";
 import { candidatesFor } from "./candidates";
 import { formatScore, type Score } from "./engine";
 import { useEngine } from "./useEngine";
+import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
 import {
   exploredMoves,
   fresh,
@@ -46,7 +47,7 @@ function App() {
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [reply, setReply] = useState<Move | null>(null);
-  const [showMoves, setShowMoves] = useState(false);
+  const [moveVisibility, setMoveVisibility] = useState(loadMoveVisibility);
   const [engineRetry, setEngineRetry] = useState(0);
   const [promotion, setPromotion] = useState<{
     from: Square;
@@ -137,8 +138,10 @@ function App() {
     setPinned(null);
     setHovered(null);
     setReply(null);
-    setShowMoves(false);
   }, [session.current, session.side]);
+  useEffect(() => {
+    saveMoveVisibility(moveVisibility);
+  }, [moveVisibility]);
   useEffect(() => {
     const line = moveLine.current;
     const current = currentMove.current;
@@ -227,6 +230,9 @@ function App() {
   const opponentTurn =
     game.turn() === (session.side === "white" ? "b" : "w") &&
     !game.isGameOver();
+  const movesVisible =
+    !game.isGameOver() &&
+    (opponentTurn ? moveVisibility.opponent : moveVisibility.own);
 
   return (
     <main>
@@ -481,21 +487,43 @@ function App() {
                 : ""}
             </p>
           )}
-          {!opponentTurn && !game.isGameOver() && (
-            <button
-              className="show-moves"
-              aria-pressed={showMoves}
-              onClick={() => {
-                setShowMoves((visible) => !visible);
-                setReply(null);
-              }}
-            >
-              {showMoves ? "Hide moves" : "Show moves"}
-            </button>
-          )}
+          <div
+            className="move-visibility"
+            role="group"
+            aria-label="Move visibility"
+          >
+            <label>
+              <input
+                type="checkbox"
+                checked={moveVisibility.own}
+                onChange={(event) => {
+                  setMoveVisibility((previous) => ({
+                    ...previous,
+                    own: event.target.checked,
+                  }));
+                  setReply(null);
+                }}
+              />{" "}
+              Show your moves
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={moveVisibility.opponent}
+                onChange={(event) => {
+                  setMoveVisibility((previous) => ({
+                    ...previous,
+                    opponent: event.target.checked,
+                  }));
+                  setReply(null);
+                }}
+              />{" "}
+              Show opponent moves
+            </label>
+          </div>
           {game.isGameOver() ? (
             <p className="muted">No legal moves available.</p>
-          ) : opponentTurn || showMoves ? (
+          ) : movesVisible ? (
             <p className="muted">
               Choose a move for {game.turn() === "w" ? "white" : "black"}.
               {analysis?.moves.length
@@ -504,10 +532,12 @@ function App() {
             </p>
           ) : (
             <p className="muted">
-              Your move. Reveal legal moves when you want them.
+              {opponentTurn
+                ? "Opponent moves are hidden."
+                : "Your moves are hidden."}
             </p>
           )}
-          {(opponentTurn || showMoves) && !game.isGameOver() && (
+          {movesVisible && (
             <div className="replies">
               {candidates.map(({ move, opening, explanation }) => (
                 <button
@@ -553,15 +583,19 @@ function App() {
                       {formatScore(engineMoves.get(move.lan)!.score)}
                     </span>
                   )}
-                  {explored.has(move.lan) && (
-                    <span
-                      className="explored-marker"
-                      title="Previously explored"
-                    >
-                      <span aria-hidden="true">●</span>
-                      <span className="sr-only">Previously explored</span>
+                  <span
+                    className="explored-marker"
+                    title={
+                      explored.has(move.lan) ? "Previously explored" : undefined
+                    }
+                  >
+                    <span aria-hidden="true">
+                      {explored.has(move.lan) ? "✓" : ""}
                     </span>
-                  )}
+                    {explored.has(move.lan) && (
+                      <span className="sr-only">Previously explored</span>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>

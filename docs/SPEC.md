@@ -6,7 +6,7 @@ A personal, cloud-hosted chess opening learning tool focused on the *first key m
 
 ## Current state and planned features
 
-The app currently supports legal play, local branching history, a few sample explanations, offline opening names, light/dark appearance, and explicit Show moves controls. A three-second Stockfish prototype displays evaluations and ranks legal moves; move-quality classifications and game popularity statistics are not yet implemented. The richer feedback and popularity features below are product goals, not descriptions of existing behavior.
+The app currently supports legal play, local branching history, a few sample explanations, offline opening names, light/dark appearance, and explicit move-visibility controls. A three-second Stockfish prototype displays evaluations and ranks legal moves; move-quality classifications and game popularity statistics are not yet implemented. The richer feedback and popularity features below are product goals, not descriptions of existing behavior.
 
 ## Primary interaction
 
@@ -14,7 +14,7 @@ The app currently supports legal play, local branching history, a few sample exp
 2. **On the user's turn**, display no automatic move recommendations or hints. The user can move any legal piece.
 3. **After the user's move**, display its algebraic notation, opening/variation name when known, a concise explanation, an engine-based move-quality classification, and the number of *meaningfully* better alternatives. Distinguish unknown evaluations from bad moves.
 4. **On the opponent's turn**, display a selectable list of candidate responses, strongest first, with opening names when applicable, practical popularity/frequency separately, and common mistakes or inaccurate moves when educational. Selecting a response plays that move.
-5. An explicit **Show moves** button on the user's turn reveals the same ranked candidate-move information, with relevant names, quality, and frequency. Never trigger it automatically.
+5. An explicit **Show your moves** checkbox on the user's turn reveals the same ranked candidate-move information, with relevant names, quality, and frequency. Never trigger it automatically.
 6. The user may freely undo, redo, select previous branches, and explore alternatives. Preserve the variation tree when diverging, rather than deleting the abandoned line.
 
 ## Board and explanation UI
