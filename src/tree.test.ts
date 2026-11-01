@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { fresh, gameAt, key, play, preferredLine, visit } from "./tree";
+import {
+  exploredMoves,
+  fresh,
+  gameAt,
+  key,
+  play,
+  preferredLine,
+  visit,
+} from "./tree";
 describe("exploration history", () => {
   it("keeps variations and restores their positions", () => {
     let s = fresh();
@@ -32,6 +40,20 @@ describe("exploration history", () => {
     s = visit(s, e5);
     s = visit(s, e4);
     expect(preferredLine(s).map((move) => move.san)).toEqual(["e5", "Nf3"]);
+  });
+  it("marks moves explored from equivalent positions without changing branches", () => {
+    let s = play(fresh(), "e2", "e4");
+    const e4 = s.current;
+    s = visit(s, "root");
+    s = play(s, "g1", "f3");
+    s = play(s, "g8", "f6");
+    s = play(s, "f3", "g1");
+    s = play(s, "f6", "g8");
+    expect(exploredMoves(s).has("e2e4")).toBe(true);
+    expect(exploredMoves(s).has("d2d4")).toBe(false);
+    s = play(s, "e2", "e4");
+    expect(s.current).not.toBe(e4);
+    expect(gameAt(s).history()).toEqual(["Nf3", "Nf6", "Ng1", "Ng8", "e4"]);
   });
   it("rejects illegal moves and reuses an existing branch", () => {
     let s = fresh();

@@ -9,6 +9,7 @@ import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
 import { candidatesFor } from "./candidates";
 import {
+  exploredMoves,
   fresh,
   gameAt,
   load,
@@ -44,7 +45,7 @@ function App() {
   } | null>(null);
   const [saved, setSaved] = useState(true);
   const [theme, setTheme] = useState<Theme>(readTheme);
-  const about = useRef<HTMLDialogElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const board = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
   const currentMove = useRef<HTMLButtonElement>(null);
@@ -64,6 +65,7 @@ function App() {
   )
     path.unshift(current);
   const forwardMoves = preferredLine(session);
+  const explored = exploredMoves(session);
   const active = hovered ?? pinned;
   const shapes: DrawShape[] = reply
     ? [
@@ -191,49 +193,6 @@ function App() {
           </strong>
           <div className="control-buttons">
             <button
-              disabled={!node.parent}
-              onClick={() => node.parent && go(node.parent)}
-            >
-              ← Back
-            </button>
-            <div className="forward-group">
-              <button
-                disabled={!preferred}
-                onClick={() => preferred && go(preferred)}
-              >
-                Forward →
-              </button>
-              <details className="menu forward-menu">
-                <summary
-                  aria-label="Choose a forward move"
-                  title="Choose a forward move"
-                  aria-disabled={!node.children.length}
-                >
-                  ▾
-                </summary>
-                <div className="menu-content">
-                  {node.children.length ? (
-                    node.children.map((id) => (
-                      <button
-                        key={id}
-                        onClick={(event) => {
-                          event.currentTarget
-                            .closest("details")
-                            ?.removeAttribute("open");
-                          go(id);
-                        }}
-                      >
-                        {session.nodes[id].san}
-                        {id === preferred ? " · most recent" : ""}
-                      </button>
-                    ))
-                  ) : (
-                    <span>No forward moves</span>
-                  )}
-                </div>
-              </details>
-            </div>
-            <button
               onClick={() =>
                 setSession((s) => ({
                   ...s,
@@ -246,6 +205,8 @@ function App() {
               ⇅
             </button>
             <button
+              aria-label="Restart"
+              title="Restart"
               onClick={() => {
                 if (
                   window.confirm(
@@ -255,39 +216,17 @@ function App() {
                   setSession(fresh(session.side));
               }}
             >
-              Restart
+              ↻
             </button>
-            <details className="menu settings-menu">
-              <summary
-                aria-label="Appearance settings"
-                title="Appearance settings"
-              >
-                ⚙
-              </summary>
-              <div className="menu-content">
-                <label>
-                  Appearance{" "}
-                  <select
-                    value={theme}
-                    onChange={(event) => setTheme(event.target.value as Theme)}
-                  >
-                    <option value="system">System</option>
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                  </select>
-                </label>
-                <button
-                  onClick={(event) => {
-                    event.currentTarget
-                      .closest("details")
-                      ?.removeAttribute("open");
-                    about.current?.showModal();
-                  }}
-                >
-                  About
-                </button>
-              </div>
-            </details>
+            <button
+              onClick={() => setSettingsOpen((open) => !open)}
+              aria-label={settingsOpen ? "Close settings" : "Open settings"}
+              aria-expanded={settingsOpen}
+              aria-controls={settingsOpen ? "settings-view" : undefined}
+              title={settingsOpen ? "Close settings" : "Settings"}
+            >
+              {settingsOpen ? "×" : "⚙︎"}
+            </button>
           </div>
         </div>
         <div className="board-wrap">
@@ -295,7 +234,106 @@ function App() {
             ref={board}
             className="board"
             aria-label="Interactive chess board"
+            aria-hidden={settingsOpen}
+            style={{ visibility: settingsOpen ? "hidden" : "visible" }}
           />
+          {settingsOpen && (
+            <section
+              className="settings-view"
+              id="settings-view"
+              aria-label="Settings and About"
+            >
+              <h2>Settings</h2>
+              <label className="settings-appearance">
+                Appearance{" "}
+                <select
+                  aria-label="Appearance"
+                  value={theme}
+                  onChange={(event) => setTheme(event.target.value as Theme)}
+                >
+                  <option value="system">System</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </label>
+              <h2>About</h2>
+              <p>
+                Explore chess openings and save variations on this device.
+                Opening names are bundled with the app.
+              </p>
+              <ul>
+                <li>
+                  Opening names:{" "}
+                  <a
+                    href="https://github.com/lichess-org/chess-openings"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Lichess chess-openings dataset
+                  </a>
+                  ,{" "}
+                  <a
+                    href="https://creativecommons.org/publicdomain/zero/1.0/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    CC0
+                  </a>
+                  .
+                </li>
+                <li>
+                  Merida pieces: Armando Hernandez Marroquin, GPL-2.0-or-later;{" "}
+                  <a
+                    href="https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    source
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    license
+                  </a>
+                  .
+                </li>
+                <li>
+                  Interactive board:{" "}
+                  <a
+                    href="https://github.com/lichess-org/chessground"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Chessground
+                  </a>
+                  , GPL-3.0-or-later.
+                </li>
+                <li>
+                  Chess rules:{" "}
+                  <a
+                    href="https://github.com/jhlywa/chess.js"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    chess.js
+                  </a>
+                  , BSD-2-Clause.
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/ejball/ChessOpeningExplorer"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Application source code
+                  </a>
+                </li>
+              </ul>
+            </section>
+          )}
         </div>
         {promotion && (
           <div
@@ -326,44 +364,66 @@ function App() {
             ))}
           </div>
         )}
-        <nav
-          ref={moveLine}
-          className="move-line"
-          aria-label="Current move history"
-        >
-          <button
-            ref={node.id === "root" ? currentMove : undefined}
-            onClick={() => go("root")}
-            disabled={!node.parent}
+        <div className="board-footer">
+          <nav
+            ref={moveLine}
+            className="move-line"
+            aria-label="Current move history"
           >
-            Start
-          </button>
-          {path.map((move, index) => (
             <button
-              key={move.id}
-              ref={move.id === node.id ? currentMove : undefined}
-              className={move.id === node.id ? "selected" : ""}
-              onClick={() => go(move.id)}
+              ref={node.id === "root" ? currentMove : undefined}
+              onClick={() => go("root")}
+              disabled={!node.parent}
             >
-              {index % 2 === 0 ? `${Math.floor(index / 2) + 1}. ` : ""}
-              {move.san}
+              Start
             </button>
-          ))}
-          {forwardMoves.map((move, index) => {
-            const ply = path.length + index;
-            return (
+            {path.map((move, index) => (
               <button
                 key={move.id}
-                className="future-move"
+                ref={move.id === node.id ? currentMove : undefined}
+                className={move.id === node.id ? "selected" : ""}
                 onClick={() => go(move.id)}
-                aria-label={`Forward to ${move.san}`}
               >
-                {ply % 2 === 0 ? `${Math.floor(ply / 2) + 1}. ` : ""}
+                {index % 2 === 0 ? `${Math.floor(index / 2) + 1}. ` : ""}
                 {move.san}
               </button>
-            );
-          })}
-        </nav>
+            ))}
+            {forwardMoves.map((move, index) => {
+              const ply = path.length + index;
+              return (
+                <button
+                  key={move.id}
+                  className="future-move"
+                  onClick={() => go(move.id)}
+                  aria-label={`Forward to ${move.san}`}
+                >
+                  {ply % 2 === 0 ? `${Math.floor(ply / 2) + 1}. ` : ""}
+                  {move.san}
+                </button>
+              );
+            })}
+          </nav>
+          <div className="navigation-buttons" aria-label="Move navigation">
+            <button
+              className="navigation-button"
+              aria-label="Back"
+              title="Back"
+              disabled={!node.parent}
+              onClick={() => node.parent && go(node.parent)}
+            >
+              ‹
+            </button>
+            <button
+              className="navigation-button"
+              aria-label="Forward"
+              title="Forward"
+              disabled={!preferred}
+              onClick={() => preferred && go(preferred)}
+            >
+              ›
+            </button>
+          </div>
+        </div>
       </section>
       <aside aria-label="Position details">
         <section className="card explanation" aria-label="Position explanation">
@@ -461,6 +521,15 @@ function App() {
                   }}
                 >
                   <strong>{move.san}</strong>
+                  {explored.has(move.lan) && (
+                    <span
+                      className="explored-marker"
+                      title="Previously explored"
+                    >
+                      <span aria-hidden="true">●</span>
+                      <span className="sr-only">Previously explored</span>
+                    </span>
+                  )}
                   {(opening || explanation) && (
                     <span className="candidate-details">
                       {opening && (
@@ -484,91 +553,6 @@ function App() {
           <p role="alert">Could not save this session in local storage.</p>
         )}
       </aside>
-      <dialog
-        ref={about}
-        className="about-dialog"
-        aria-labelledby="about-title"
-      >
-        <h2 id="about-title">About Chess Opening Explorer</h2>
-        <p>
-          Explore chess openings and save variations on this device. Opening
-          names are bundled with the app.
-        </p>
-        <ul>
-          <li>
-            Opening names:{" "}
-            <a
-              href="https://github.com/lichess-org/chess-openings"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Lichess chess-openings dataset
-            </a>
-            ,{" "}
-            <a
-              href="https://creativecommons.org/publicdomain/zero/1.0/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              CC0
-            </a>
-            .
-          </li>
-          <li>
-            Merida pieces: Armando Hernandez Marroquin, GPL-2.0-or-later;{" "}
-            <a
-              href="https://github.com/lichess-org/lila/tree/4dcff2a4653c092a5e333fd6843e37c5f0277882/public/piece/merida"
-              target="_blank"
-              rel="noreferrer"
-            >
-              source
-            </a>{" "}
-            and{" "}
-            <a
-              href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
-              target="_blank"
-              rel="noreferrer"
-            >
-              license
-            </a>
-            .
-          </li>
-          <li>
-            Interactive board:{" "}
-            <a
-              href="https://github.com/lichess-org/chessground"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Chessground
-            </a>
-            , GPL-3.0-or-later.
-          </li>
-          <li>
-            Chess rules:{" "}
-            <a
-              href="https://github.com/jhlywa/chess.js"
-              target="_blank"
-              rel="noreferrer"
-            >
-              chess.js
-            </a>
-            , BSD-2-Clause.
-          </li>
-          <li>
-            <a
-              href="https://github.com/ejball/ChessOpeningExplorer"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Application source code
-            </a>
-          </li>
-        </ul>
-        <form method="dialog">
-          <button autoFocus>Close</button>
-        </form>
-      </dialog>
     </main>
   );
 }
