@@ -37,6 +37,18 @@ function readTheme(): Theme {
 }
 
 function App() {
+  const isAppleMobile =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const [standalone, setStandalone] = useState(
+    () =>
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true,
+  );
+  const [fullScreen, setFullScreen] = useState(
+    () => !!document.fullscreenElement,
+  );
+  const [screenHelp, setScreenHelp] = useState<"iphone" | "error">("iphone");
   const [session, setSession] = useState<Session>(load);
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -55,6 +67,7 @@ function App() {
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   const about = useRef<HTMLDialogElement>(null);
+  const screenDialog = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
   const explanationWindow = useRef<HTMLDivElement>(null);
   const explanationContent = useRef<HTMLDivElement>(null);
@@ -112,6 +125,22 @@ function App() {
       ? []
       : (note?.segments[active]?.shapes ?? []);
 
+  useEffect(() => {
+    const mode = window.matchMedia("(display-mode: standalone)");
+    const updateMode = () =>
+      setStandalone(
+        mode.matches ||
+          (navigator as Navigator & { standalone?: boolean }).standalone ===
+            true,
+      );
+    const updateFullScreen = () => setFullScreen(!!document.fullscreenElement);
+    mode.addEventListener("change", updateMode);
+    document.addEventListener("fullscreenchange", updateFullScreen);
+    return () => {
+      mode.removeEventListener("change", updateMode);
+      document.removeEventListener("fullscreenchange", updateFullScreen);
+    };
+  }, []);
   useEffect(() => {
     const preference = window.matchMedia("(prefers-color-scheme: dark)");
     const update = () => setSystemDark(preference.matches);
@@ -227,6 +256,20 @@ function App() {
 
   function go(id: string) {
     setSession((s) => visit(s, id));
+  }
+  async function toggleFullScreen() {
+    if (isAppleMobile) {
+      setScreenHelp("iphone");
+      screenDialog.current?.showModal();
+      return;
+    }
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      setScreenHelp("error");
+      screenDialog.current?.showModal();
+    }
   }
   const status = game.isCheckmate()
     ? "Checkmate"
@@ -458,7 +501,36 @@ function App() {
               );
             })}
           </nav>
-          <div className="navigation-buttons" aria-label="Move navigation">
+          <div className="navigation-buttons" aria-label="Board and move navigation">
+            {!standalone && (isAppleMobile || document.fullscreenEnabled) && (
+              <button
+                className="icon-button full-screen-button navigation-button"
+                aria-label={
+                  isAppleMobile
+                    ? "Add to Home Screen"
+                    : fullScreen
+                      ? "Exit full screen"
+                      : "Enter full screen"
+                }
+                title={
+                  isAppleMobile
+                    ? "Add to Home Screen"
+                    : fullScreen
+                      ? "Exit full screen"
+                      : "Enter full screen"
+                }
+                aria-haspopup={isAppleMobile ? "dialog" : undefined}
+                onClick={toggleFullScreen}
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  {fullScreen ? (
+                    <path d="M4 9h5V4m6 0v5h5M4 15h5v5m6 0v-5h5" />
+                  ) : (
+                    <path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5" />
+                  )}
+                </svg>
+              </button>
+            )}
             <button
               className="navigation-button"
               aria-label="Back"
@@ -672,6 +744,47 @@ function App() {
           <p role="alert">Could not save this session in local storage.</p>
         )}
       </aside>
+      <dialog
+        ref={screenDialog}
+        className="about-dialog"
+        aria-labelledby="screen-help-title"
+      >
+        {screenHelp === "iphone" ? (
+          <>
+            <h2 id="screen-help-title">Add to Home Screen</h2>
+            <p>Open this page in Safari, then:</p>
+            <ol>
+              <li>Tap the Share button (the square with an upward arrow).</li>
+              <li>
+                Choose <strong>Add to Home Screen</strong>. Scroll down in the
+                Share menu if needed.
+              </li>
+              <li>
+                If offered, turn on <strong>Open as Web App</strong>, then tap{" "}
+                <strong>Add</strong>.
+              </li>
+              <li>
+                Open Chess Opening Explorer from its new Home Screen icon.
+              </li>
+            </ol>
+            <p>
+              The Home Screen app may have a separate saved exploration from
+              Safari.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 id="screen-help-title">Full screen unavailable</h2>
+            <p>
+              Your browser could not enter full screen. Try again or check your
+              browser settings.
+            </p>
+          </>
+        )}
+        <form method="dialog">
+          <button autoFocus>Close</button>
+        </form>
+      </dialog>
       <dialog
         ref={about}
         className="about-dialog"
