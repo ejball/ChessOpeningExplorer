@@ -1090,7 +1090,8 @@ aside.details-pane > .reply-card {
   border-top: 1px solid var(--border);
 }
 .explanation-window {
-  --explanation-height: 80px;
+  /* Leave room for the opening name, three lines of text, and a fading line. */
+  --explanation-height: 144px;
   height: var(--explanation-height);
   overflow: hidden;
 }
@@ -1099,7 +1100,7 @@ aside.details-pane > .reply-card {
   overflow: visible;
 }
 .explanation-window.overflowing:not(.expanded) {
-  mask-image: linear-gradient(to bottom, black calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent);
 }
 .explanation-content {
   display: flow-root;
@@ -1124,6 +1125,12 @@ aside.details-pane > .reply-card {
   outline-offset: -3px;
 }
 @media (max-width: 700px) {
+  .details-pane .explanation-window {
+    --explanation-height: 126px;
+  }
+  .details-pane .explanation-window.overflowing:not(.expanded) {
+    mask-image: linear-gradient(to bottom, black calc(100% - 21px), transparent);
+  }
   .details-pane .explanation p {
     font-size: 14px;
   }
