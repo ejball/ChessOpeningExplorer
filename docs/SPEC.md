@@ -6,7 +6,7 @@ A personal, cloud-hosted chess opening learning tool focused on the *first key m
 
 ## Current state and planned features
 
-The app currently supports legal play, local branching history, a few sample explanations, offline opening names, light/dark appearance, and explicit Show moves controls. It does not yet have engine analysis, ranked moves, or game popularity statistics. The richer feedback and rankings below are product goals, not descriptions of existing behavior.
+The app currently supports legal play, local branching history, a few sample explanations, offline opening names, light/dark appearance, and explicit Show moves controls. A three-second Stockfish prototype displays evaluations and ranks legal moves; move-quality classifications and game popularity statistics are not yet implemented. The richer feedback and popularity features below are product goals, not descriptions of existing behavior.
 
 ## Primary interaction
 
