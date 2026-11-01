@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Chessground } from "chessground";
 import type { Api } from "chessground/api";
@@ -41,6 +41,8 @@ function App() {
   const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [reply, setReply] = useState<Move | null>(null);
+  const [explanationExpanded, setExplanationExpanded] = useState(false);
+  const [explanationOverflows, setExplanationOverflows] = useState(false);
   const [moveVisibility, setMoveVisibility] = useState(loadMoveVisibility);
   const [engineRetry, setEngineRetry] = useState(0);
   const [promotion, setPromotion] = useState<{
@@ -54,6 +56,8 @@ function App() {
   );
   const about = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
+  const explanationWindow = useRef<HTMLDivElement>(null);
+  const explanationContent = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
   const currentMove = useRef<HTMLButtonElement>(null);
   const api = useRef<Api | null>(null);
@@ -133,6 +137,38 @@ function App() {
     setHovered(null);
     setReply(null);
   }, [session.current, session.side]);
+  useEffect(() => {
+    setExplanationExpanded(false);
+  }, [session.current]);
+  useLayoutEffect(() => {
+    const viewport = explanationWindow.current;
+    const content = explanationContent.current;
+    if (!viewport || !content) return;
+    const measure = () => {
+      const limit = Number.parseFloat(
+        getComputedStyle(viewport).getPropertyValue("--explanation-height"),
+      );
+      setExplanationOverflows(
+        content.getBoundingClientRect().height > limit + 0.5,
+      );
+      const bottom = viewport.getBoundingClientRect().top + limit;
+      // Do not tab into annotation controls hidden below the collapsed region.
+      content
+        .querySelectorAll<HTMLButtonElement>("button.annotation")
+        .forEach((button) => {
+          button.tabIndex =
+            explanationExpanded ||
+            button.getBoundingClientRect().bottom <= bottom
+              ? 0
+              : -1;
+        });
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    observer.observe(content);
+    measure();
+    return () => observer.disconnect();
+  }, [session.current, explanationExpanded]);
   useEffect(() => {
     saveMoveVisibility(moveVisibility);
   }, [moveVisibility]);
@@ -448,53 +484,77 @@ function App() {
           </div>
         </div>
       </section>
-      <aside aria-label="Position details">
+      <aside
+        className="details-pane"
+        aria-label="Position details"
+        tabIndex={0}
+      >
         <section className="card explanation" aria-label="Position explanation">
-          {opening && (
-            <p className="opening-name">
-              {opening.current ? "" : "Last recognized: "}
-              {opening.name}
-            </p>
-          )}
-          {note ? (
-            <>
-              <p>
-                {note.segments.map((segment, i) =>
-                  segment.shapes ? (
-                    <button
-                      key={i}
-                      className="annotation"
-                      aria-pressed={pinned === i}
-                      onPointerEnter={(event) => {
-                        if (event.pointerType === "mouse") setHovered(i);
-                      }}
-                      onPointerLeave={(event) => {
-                        if (event.pointerType === "mouse") setHovered(null);
-                      }}
-                      onFocus={(event) => {
-                        if (event.currentTarget.matches(":focus-visible"))
-                          setHovered(i);
-                      }}
-                      onBlur={() => setHovered(null)}
-                      onClick={() =>
-                        setPinned((previous) => (previous === i ? null : i))
-                      }
-                    >
-                      {segment.text}
-                    </button>
-                  ) : (
-                    <span key={i}>{segment.text}</span>
-                  ),
-                )}
-              </p>
-            </>
-          ) : (
-            <p>
-              {path.length
-                ? "Explore this position."
-                : "Choose a side and make a move to begin exploring."}
-            </p>
-          )}
+          <div
+            id="explanation-text"
+            ref={explanationWindow}
+            className={`explanation-window${explanationExpanded ? " expanded" : ""}${explanationOverflows ? " overflowing" : ""}`}
+          >
+            <div ref={explanationContent} className="explanation-content">
+              {opening && (
+                <p className="opening-name">
+                  {opening.current ? "" : "Last recognized: "}
+                  {opening.name}
+                </p>
+              )}
+              {note ? (
+                <>
+                  <p>
+                    {note.segments.map((segment, i) =>
+                      segment.shapes ? (
+                        <button
+                          key={i}
+                          className="annotation"
+                          aria-pressed={pinned === i}
+                          onPointerEnter={(event) => {
+                            if (event.pointerType === "mouse") setHovered(i);
+                          }}
+                          onPointerLeave={(event) => {
+                            if (event.pointerType === "mouse") setHovered(null);
+                          }}
+                          onFocus={(event) => {
+                            if (event.currentTarget.matches(":focus-visible"))
+                              setHovered(i);
+                          }}
+                          onBlur={() => setHovered(null)}
+                          onClick={() =>
+                            setPinned((previous) => (previous === i ? null : i))
+                          }
+                        >
+                          {segment.text}
+                        </button>
+                      ) : (
+                        <span key={i}>{segment.text}</span>
+                      ),
+                    )}
+                  </p>
+                </>
+              ) : (
+                <p>
+                  {path.length
+                    ? "Explore this position."
+                    : "Choose a side and make a move to begin exploring."}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="show-more-slot">
+            {explanationOverflows && (
+              <button
+                className="show-more"
+                aria-expanded={explanationExpanded}
+                aria-controls="explanation-text"
+                onClick={() => setExplanationExpanded((expanded) => !expanded)}
+              >
+                {explanationExpanded ? "Show less" : "Show more"}
+              </button>
+            )}
+          </div>
         </section>
         <section className="card reply-card" aria-label="Next moves">
           <div className="move-visibility">

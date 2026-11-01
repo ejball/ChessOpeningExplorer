@@ -1069,3 +1069,86 @@ body {
   outline: 3px solid #c08b37;
   outline-offset: 2px;
 }
+
+/* One scrollable details pane, with a compact expandable explanation. */
+aside.details-pane {
+  display: block;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+aside.details-pane > .card {
+  display: block;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 12px;
+}
+aside.details-pane > .reply-card {
+  border-top: 1px solid var(--border);
+}
+.explanation-window {
+  /* Leave room for the opening name, three lines of text, and a fading line. */
+  --explanation-height: 144px;
+  height: var(--explanation-height);
+  overflow: hidden;
+}
+.explanation-window.expanded {
+  height: auto;
+  overflow: visible;
+}
+.explanation-window.overflowing:not(.expanded) {
+  mask-image: linear-gradient(to bottom, black calc(100% - 24px), transparent);
+}
+.explanation-content {
+  display: flow-root;
+}
+.show-more-slot {
+  height: 26px;
+}
+.show-more {
+  height: 26px;
+  padding: 3px 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.details-pane:focus-visible,
+.show-more:focus-visible {
+  outline: 3px solid #c08b37;
+  outline-offset: -3px;
+}
+@media (max-width: 700px) {
+  .details-pane .explanation-window {
+    --explanation-height: 126px;
+  }
+  .details-pane .explanation-window.overflowing:not(.expanded) {
+    mask-image: linear-gradient(to bottom, black calc(100% - 21px), transparent);
+  }
+  .details-pane .explanation p {
+    font-size: 14px;
+  }
+  .details-pane .explanation .opening-name {
+    font-size: 13px !important;
+  }
+  .details-pane .move-visibility label,
+  .details-pane .replies button {
+    font-size: 13px;
+  }
+  .details-pane .replies button .candidate-heading strong {
+    font-size: 13px;
+  }
+  .details-pane .replies button .candidate-opening,
+  .details-pane .replies button .candidate-explanation {
+    font-size: 12px;
+  }
+  .details-pane .show-more {
+    font-size: 12px;
+  }
+}
