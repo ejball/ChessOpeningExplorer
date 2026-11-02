@@ -458,7 +458,7 @@ function App() {
               );
             })}
           </nav>
-          <div className="navigation-buttons" aria-label="Move navigation">
+          <div className="navigation-buttons" aria-label="Board and move navigation">
             <button
               className="navigation-button"
               aria-label="Back"
