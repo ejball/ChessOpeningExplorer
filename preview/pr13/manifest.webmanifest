@@ -1,6 +1,6 @@
 {
   "name": "Chess Opening Explorer",
-  "short_name": "Chess Explorer",
+  "short_name": "Chess Openings",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
