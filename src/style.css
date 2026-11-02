@@ -915,11 +915,6 @@ h2,
   align-items: center;
   justify-content: center;
 }
-@media (min-width: 701px) and (pointer: fine) {
-  .full-screen-button {
-    display: none;
-  }
-}
 .icon-button svg {
   width: 17px;
   height: 17px;
