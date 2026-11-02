@@ -56,6 +56,7 @@ function App() {
   );
   const about = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
+  const detailsPane = useRef<HTMLElement>(null);
   const explanationWindow = useRef<HTMLDivElement>(null);
   const explanationContent = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
@@ -139,6 +140,9 @@ function App() {
   }, [session.current, session.side]);
   useEffect(() => {
     setExplanationExpanded(false);
+  }, [session.current]);
+  useLayoutEffect(() => {
+    if (detailsPane.current) detailsPane.current.scrollTop = 0;
   }, [session.current]);
   useLayoutEffect(() => {
     const viewport = explanationWindow.current;
@@ -485,6 +489,7 @@ function App() {
         </div>
       </section>
       <aside
+        ref={detailsPane}
         className="details-pane"
         aria-label="Position details"
         tabIndex={0}
