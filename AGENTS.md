@@ -7,3 +7,5 @@ Use React + TypeScript + Vite, chess.js, Chessground, and Vitest unless requirem
 Don't expose move suggestions on the user's turn until the user explicitly enables Show your moves. After move, present reliable feedback; during opponent's turn, show candidate moves. Keep variation branches and position visit metadata. Explanation annotations must not mutate actual game state.
 
 Run typechecking, tests, and production build where available. Add tests for state/history correctness. If evaluation/opening information is unavailable, state that rather than inventing assessments. Keep documentation updated when decisions change. Observe GPL licensing and source availability.
+
+When creating or adding to a PR, include a link to its preview site in the response so the user can check the changes easily.
