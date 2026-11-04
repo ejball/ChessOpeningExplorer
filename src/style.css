@@ -74,6 +74,11 @@ body {
     background-clip: text;
   }
 }
+@media (display-mode: standalone) and (max-width: 700px) and (orientation: portrait) {
+  main {
+    margin-top: -4px;
+  }
+}
 button,
 select {
   font: inherit;
