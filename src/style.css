@@ -62,8 +62,7 @@ body {
 }
 /* Give WebKit a fixed top edge in installed apps without covering controls. */
 @media (display-mode: standalone) {
-  body::before {
-    content: "";
+  .standalone-top-edge {
     position: fixed;
     inset: 0 0 auto;
     height: 12px;
@@ -72,11 +71,6 @@ body {
     background-color: var(--background);
     -webkit-background-clip: text;
     background-clip: text;
-  }
-}
-@media (display-mode: standalone) and (max-width: 700px) and (orientation: portrait) {
-  main {
-    margin-top: -4px;
   }
 }
 button,
