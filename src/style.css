@@ -60,6 +60,19 @@ body {
   height: 100dvh;
   overflow: hidden;
 }
+/* Give WebKit a fixed top edge in installed apps without covering controls. */
+@media (display-mode: standalone) {
+  .standalone-top-edge {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 12px;
+    z-index: 1;
+    pointer-events: none;
+    background-color: var(--background);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
 button,
 select {
   font: inherit;
