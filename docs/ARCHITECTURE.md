@@ -2,7 +2,7 @@
 
 ## Delivery model
 
-A static React + TypeScript web application built with Vite, hosted at GitHub Pages via GitHub Actions. No server-side runtime for MVP. Set Vite `base: '/ChessOpeningExplorer/'` for the project site. Prefer relative asset URLs and avoid client-side deep-link routing that requires server rewrites.
+A static React + TypeScript web application built with Vite, hosted at chess.ejball.com on GitHub Pages via GitHub Actions. No server-side runtime for MVP. Set Vite `base: '/'` for production; the preview workflow supplies its own base. Prefer relative asset URLs and avoid client-side deep-link routing that requires server rewrites.
 
 ## Current implementation
 

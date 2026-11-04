@@ -56,7 +56,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           npm ci
-          npm run build -- --base="/ChessOpeningExplorer/preview/pr${PR_NUMBER}/"
+          npm run build -- --base="/preview/pr${PR_NUMBER}/"
       - name: Upload preview build
         if: github.event_name == 'pull_request' && github.event.action != 'closed'
         uses: actions/upload-artifact@v4
@@ -74,7 +74,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' && format('https://ejball.com/ChessOpeningExplorer/preview/pr{0}/', github.event.pull_request.number) || steps.deploy.outputs.page_url }}
+      url: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' && format('https://chess.ejball.com/preview/pr{0}/', github.event.pull_request.number) || steps.deploy.outputs.page_url }}
     steps:
       # The deployment job never checks out or runs pull request code.
       - name: Check out production repository
@@ -141,4 +141,4 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          echo "Preview: https://ejball.github.io/ChessOpeningExplorer/preview/pr${PR_NUMBER}/" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview: https://chess.ejball.com/preview/pr${PR_NUMBER}/" >> "$GITHUB_STEP_SUMMARY"

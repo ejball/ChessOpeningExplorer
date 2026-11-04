@@ -12,7 +12,7 @@ You can add the app to your mobile Home Screen and open it as a web app. On iPho
 
 The engine prototype runs Stockfish.js 19 lite locally in a worker for approximately three seconds per position. It reports a position score and ranks all legal moves after a complete comparison at one search depth. Score pills use color to indicate the side ahead and show a positive advantage; a neutral pill indicates zero. Early results are provisional and may change while analysis runs. Use Think more beside the board score to request another bounded search; the idle engine can reuse cached analysis for the same position. On the user's turn, move rankings remain hidden until Show your moves is enabled. See [data/README.md](data/README.md) for engine provenance and licensing.
 
-The static build uses `/ChessOpeningExplorer/` as its base path for GitHub Pages. In repository Settings → Pages, select GitHub Actions as the deployment source.
+The static build uses `/` as its base path for the custom domain `chess.ejball.com`. In repository Settings → Pages, select GitHub Actions as the deployment source and configure the custom domain.
 
 Chessground is GPL-3.0 licensed; see its license in the dependency and the source at https://github.com/lichess-org/chessground. This application's source is available at https://github.com/ejball/ChessOpeningExplorer.
 
@@ -20,7 +20,7 @@ See [SPEC.md](docs/SPEC.md) for product goals and current scope, [ARCHITECTURE.m
 
 ## Pull request previews
 
-Pull requests from branches in this repository are published at `https://ejball.github.io/ChessOpeningExplorer/preview/pr<number>/` (for example, `preview/pr42/`). The deployment workflow prints the link in its run summary, updates the preview when the PR changes, and removes it when the PR closes. Fork PRs do not deploy previews because they cannot safely publish with repository credentials.
+Pull requests from branches in this repository are published at `https://chess.ejball.com/preview/pr<number>/` (for example, `preview/pr42/`). The deployment workflow prints the link in its run summary, updates the preview when the PR changes, and removes it when the PR closes. Fork PRs do not deploy previews because they cannot safely publish with repository credentials.
 
 The workflow keeps the production site and preview files together on the `gh-pages` branch, then deploys the combined site with GitHub Actions. Keep Pages configured to use **GitHub Actions**; the branch is storage for the workflow, not the Pages source. Previews are public. They share the production site's browser origin, so they also share its localStorage.
 

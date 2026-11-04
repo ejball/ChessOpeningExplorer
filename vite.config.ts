@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { explanationPlugin } from "./scripts/explanations.mjs";
 export default defineConfig({
-  base: "/ChessOpeningExplorer/",
+  base: "/",
   plugins: [explanationPlugin(), react()],
   build: {
     rollupOptions: {
