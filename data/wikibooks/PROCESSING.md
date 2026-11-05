@@ -664,7 +664,7 @@ Update the existing row when a page is processed; add another row if it supports
 | `d4 d5 c4 dxc4 Nf3 Nf6` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6](https://en.wikibooks.org/w/index.php?oldid=4602778) | 4602778 | explained | — |
 | `—` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/3. e3](https://en.wikibooks.org/w/index.php?oldid=4003791) | 4003791 | unprocessed | Redirect |
 | `—` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/3. e3/3...e6](https://en.wikibooks.org/w/index.php?oldid=4003793) | 4003793 | unprocessed | Redirect |
-| `—` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/4. e3](https://en.wikibooks.org/w/index.php?oldid=4612420) | 4612420 | unprocessed | — |
+| `d4 d5 c4 dxc4 Nf3 Nf6 e3` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/4. e3](https://en.wikibooks.org/w/index.php?oldid=4612420) | 4612420 | explained | — |
 | `—` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/4. e3/4...e6](https://en.wikibooks.org/w/index.php?oldid=4613136) | 4613136 | unprocessed | — |
 | `—` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/4. e3/4...e6/5. Bxc4](https://en.wikibooks.org/w/index.php?oldid=4613137) | 4613137 | unprocessed | — |
 | `—` | [1. d4/1...d5/2. c4/2...dxc4/3. Nf3/3...Nf6/4. e3/4...e6/5. Bxc4/5...c5](https://en.wikibooks.org/w/index.php?oldid=4613139) | 4613139 | unprocessed | — |
@@ -1112,8 +1112,8 @@ Update the existing row when a page is processed; add another row if it supports
 | `e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e6` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Be3/6...e6](https://en.wikibooks.org/w/index.php?oldid=4395277) | 4395277 | explained | — |
 | `—` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Be3/6...e6/7. g4](https://en.wikibooks.org/w/index.php?oldid=4641180) | 4641180 | unprocessed | — |
 | `e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Bg5` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5](https://en.wikibooks.org/w/index.php?oldid=3229822) | 3229822 | explained | — |
-| `—` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...Nbd7](https://en.wikibooks.org/w/index.php?oldid=3229823) | 3229823 | unprocessed | — |
-| `—` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...e6](https://en.wikibooks.org/w/index.php?oldid=4644735) | 4644735 | unprocessed | — |
+| `e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Bg5 Nbd7` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...Nbd7](https://en.wikibooks.org/w/index.php?oldid=3229823) | 3229823 | explained | — |
+| `e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Bg5 e6` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...e6](https://en.wikibooks.org/w/index.php?oldid=4644735) | 4644735 | explained | — |
 | `—` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...e6/7. Qf3](https://en.wikibooks.org/w/index.php?oldid=4633469) | 4633469 | unprocessed | — |
 | `—` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...e6/7. f4](https://en.wikibooks.org/w/index.php?oldid=4603158) | 4603158 | unprocessed | — |
 | `—` | [1. e4/1...c5/2. Nf3/2...d6/3. d4/3...cxd4/4. Nxd4/4...Nf6/5. Nc3/5...a6/6. Bg5/6...e6/7. f4/7...Be7](https://en.wikibooks.org/w/index.php?oldid=3229826) | 3229826 | unprocessed | — |
@@ -1440,8 +1440,8 @@ Update the existing row when a page is processed; add another row if it supports
 | `e4 c6 d4 d5 e5 Bf5 Nf3 e6` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6](https://en.wikibooks.org/w/index.php?oldid=3269602) | 3269602 | explained | — |
 | `e4 c6 d4 d5 e5 Bf5 Nf3 e6 Be2` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2](https://en.wikibooks.org/w/index.php?oldid=3269603) | 3269603 | explained | — |
 | `—` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Bb4](https://en.wikibooks.org/w/index.php?oldid=3269605) | 3269605 | unprocessed | — |
-| `—` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Bg4](https://en.wikibooks.org/w/index.php?oldid=3269606) | 3269606 | unprocessed | — |
-| `—` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Nd7](https://en.wikibooks.org/w/index.php?oldid=3269607) | 3269607 | unprocessed | — |
+| `e4 c6 d4 d5 e5 Bf5 Nf3 e6 Be2 Bg4` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Bg4](https://en.wikibooks.org/w/index.php?oldid=3269606) | 3269606 | explained | — |
+| `e4 c6 d4 d5 e5 Bf5 Nf3 e6 Be2 Nd7` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Nd7](https://en.wikibooks.org/w/index.php?oldid=3269607) | 3269607 | explained | — |
 | `—` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Nd7/6. O-O](https://en.wikibooks.org/w/index.php?oldid=3269608) | 3269608 | unprocessed | — |
 | `—` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Nd7/6. O-O/6...Ne7](https://en.wikibooks.org/w/index.php?oldid=3269609) | 3269609 | unprocessed | — |
 | `—` | [1. e4/1...c6/2. d4/2...d5/3. e5/3...Bf5/4. Nf3/4...e6/5. Be2/5...Nd7/6. O-O/6...Ne7/7. Nh4](https://en.wikibooks.org/w/index.php?oldid=3269610) | 3269610 | unprocessed | — |
@@ -2459,8 +2459,8 @@ Update the existing row when a page is processed; add another row if it supports
 | `e4 e5 Nf3 Nf6 Nxe5 d6 Nd3` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nd3](https://en.wikibooks.org/w/index.php?oldid=4677529) | 4677529 | explained | — |
 | `e4 e5 Nf3 Nf6 Nxe5 d6 Nf3` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3](https://en.wikibooks.org/w/index.php?oldid=4463830) | 4463830 | explained | — |
 | `e4 e5 Nf3 Nf6 Nxe5 d6 Nf3 Nxe4` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3/4...Nxe4](https://en.wikibooks.org/w/index.php?oldid=4522296) | 4522296 | explained | — |
-| `—` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3/4...Nxe4/5. Nc3](https://en.wikibooks.org/w/index.php?oldid=4678819) | 4678819 | unprocessed | — |
-| `—` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3/4...Nxe4/5. d4](https://en.wikibooks.org/w/index.php?oldid=4246448) | 4246448 | unprocessed | — |
+| `e4 e5 Nf3 Nf6 Nxe5 d6 Nf3 Nxe4 Nc3` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3/4...Nxe4/5. Nc3](https://en.wikibooks.org/w/index.php?oldid=4678819) | 4678819 | explained | — |
+| `e4 e5 Nf3 Nf6 Nxe5 d6 Nf3 Nxe4 d4` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3/4...Nxe4/5. d4](https://en.wikibooks.org/w/index.php?oldid=4246448) | 4246448 | explained | — |
 | `—` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nf3/4...Nxe4/5.Nc3](https://en.wikibooks.org/w/index.php?oldid=4002339) | 4002339 | unprocessed | Redirect |
 | `—` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nxf7](https://en.wikibooks.org/w/index.php?oldid=4629999) | 4629999 | unprocessed | — |
 | `—` | [1. e4/1...e5/2. Nf3/2...Nf6/3. Nxe5/3...d6/4. Nxf7/4...Kxf7](https://en.wikibooks.org/w/index.php?oldid=4603159) | 4603159 | unprocessed | — |
@@ -2924,8 +2924,8 @@ Update the existing row when a page is processed; add another row if it supports
 | `e4 e6 d4 d5 e5 c5 c3` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3](https://en.wikibooks.org/w/index.php?oldid=4610827) | 4610827 | explained | — |
 | `e4 e6 d4 d5 e5 c5 c3 Nc6` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6](https://en.wikibooks.org/w/index.php?oldid=4610815) | 4610815 | explained | — |
 | `e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3](https://en.wikibooks.org/w/index.php?oldid=4677552) | 4677552 | explained | — |
-| `—` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Bd7](https://en.wikibooks.org/w/index.php?oldid=4677389) | 4677389 | unprocessed | — |
-| `—` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Qb6](https://en.wikibooks.org/w/index.php?oldid=4610806) | 4610806 | unprocessed | — |
+| `e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3 Bd7` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Bd7](https://en.wikibooks.org/w/index.php?oldid=4677389) | 4677389 | explained | — |
+| `e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3 Qb6` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Qb6](https://en.wikibooks.org/w/index.php?oldid=4610806) | 4610806 | explained | — |
 | `—` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Qb6/6. Bd3](https://en.wikibooks.org/w/index.php?oldid=4622057) | 4622057 | unprocessed | — |
 | `—` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Qb6/6. Bd3/6...cxd4](https://en.wikibooks.org/w/index.php?oldid=4319468) | 4319468 | unprocessed | — |
 | `—` | [1. e4/1...e6/2. d4/2...d5/3. e5/3...c5/4. c3/4...Nc6/5. Nf3/5...Qb6/6. Bd3/6...cxd4/7. cxd4](https://en.wikibooks.org/w/index.php?oldid=4207608) | 4207608 | unprocessed | — |
