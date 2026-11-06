@@ -805,9 +805,18 @@ aside {
   height: 12px;
   border-radius: 6px;
   background: var(--surface-soft);
+  animation: move-placeholder-pulse 1.6s ease-in-out infinite;
 }
 .move-placeholder span + span {
   width: 40px;
+}
+@keyframes move-placeholder-pulse {
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .move-placeholder span {
+    animation: none;
+  }
 }
 .replies button,
 .replies button:has(.candidate-details) {
