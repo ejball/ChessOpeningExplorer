@@ -1,6 +1,7 @@
 import type { Chess, Move } from "chess.js";
 import { notes } from "./notes";
 import { openingAt, type Opening } from "./openings";
+import type { Analysis } from "./engine";
 
 export type Candidate = {
   move: Move;
@@ -14,6 +15,17 @@ export function nextUnexploredCandidate(
   explored: ReadonlySet<string>,
 ): Candidate | undefined {
   return candidates.find(({ move }) => !explored.has(move.lan)) ?? candidates[0];
+}
+
+export function queuedMoveState(
+  queuedPosition: string,
+  currentPosition: string,
+  analysis: Analysis | undefined,
+  hasRanking: boolean,
+): "wait" | "play" | "cancel" {
+  if (queuedPosition !== currentPosition) return "cancel";
+  if (!analysis || analysis.status === "loading" || analysis.status === "analyzing") return "wait";
+  return analysis.position === currentPosition && hasRanking ? "play" : "cancel";
 }
 
 // An opening label or explanation is context, not a ranking of move quality.

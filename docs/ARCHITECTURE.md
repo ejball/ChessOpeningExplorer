@@ -12,7 +12,7 @@ A static React + TypeScript web application built with Vite, hosted at chess.ejb
 - `src/data/explanations.xml` contains hand-written explanations derived from pinned Wikibooks source revisions, with non-mutating board annotations. A Vite plugin validates and compiles the XML into app data at build time. Source snapshots, licensing and attribution are documented in `data/README.md`.
 - `src/useEngine.ts` runs the single-threaded Stockfish.js worker, leaves it idle between requested searches so it can reuse its cache, and terminates it when the position changes; `src/engine.ts` parses and groups complete UCI analysis iterations.
 - While Stockfish is searching, visible move lists show placeholders until the search finishes; the board evaluation continues to update. Select the evaluation pill to request more analysis when available. If analysis fails or is incomplete, legal moves remain available.
-- The Move control plays the first unexplored move in the current ranking, or the first move when all have been explored. Before a complete engine ranking is available, it uses the list's context-first fallback order.
+- The Move control plays the first unexplored move in the current ranking, or the first move when all have been explored. During analysis it waits for the search to finish; changing position or a failure without a complete ranking cancels the pending move. Outside a search, the list's context-first fallback order is available if analysis is unavailable.
 - `src/style.css` contains the responsive light/dark presentation. Production and PR previews are built by `.github/workflows/deploy.yml`.
 
 The sections below also describe intended future capabilities; they are not all implemented yet.
