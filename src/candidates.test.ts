@@ -1,8 +1,16 @@
 import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
-import { candidatesFor } from "./candidates";
+import { candidatesFor, nextUnexploredCandidate } from "./candidates";
 
 describe("candidate context", () => {
+  it("selects the first unexplored candidate, falling back to the first", () => {
+    const candidates = candidatesFor(new Chess());
+    const [first, second] = candidates;
+    expect(nextUnexploredCandidate(candidates, new Set())).toBe(first);
+    expect(nextUnexploredCandidate(candidates, new Set([first.move.lan]))).toBe(second);
+    expect(nextUnexploredCandidate(candidates, new Set(candidates.map(({ move }) => move.lan)))).toBe(first);
+    expect(nextUnexploredCandidate([], new Set())).toBeUndefined();
+  });
   it("shows a named opening and curated explanation without changing the position", () => {
     const game = new Chess();
     game.move("e4");

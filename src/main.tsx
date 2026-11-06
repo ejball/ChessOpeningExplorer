@@ -7,7 +7,7 @@ import type { DrawShape } from "chessground/draw";
 import type { Move, Square } from "chess.js";
 import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
-import { candidatesFor } from "./candidates";
+import { candidatesFor, nextUnexploredCandidate } from "./candidates";
 import { boardScore, scoreDescription, scoreSide } from "./engine";
 import { useEngine } from "./useEngine";
 import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
@@ -295,7 +295,7 @@ function App() {
             {!game.isGameOver() && (
               <button
                 className={`evaluation-pill engine-evaluation ${movesLoading ? "is-analyzing" : ""} ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
-                title={`${engineTooltip}${analysis?.canContinue ? " · Think more" : ""}`}
+                title={`${engineTooltip}\n(click to think more)`}
                 aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}${analysis?.canContinue ? ". Think more" : ""}`}
                 aria-disabled={!analysis?.canContinue}
                 onClick={() => {
@@ -572,6 +572,20 @@ function App() {
         </section>
         <section className="card reply-card" aria-label="Next moves">
           <div className="move-visibility">
+            <button
+              type="button"
+              className="move-action"
+              disabled={game.isGameOver() || !candidates.length}
+              onClick={() => {
+                const candidate = nextUnexploredCandidate(candidates, explored);
+                if (!candidate) return;
+                const { move } = candidate;
+                setReply(null);
+                setSession((s) => play(s, move.from, move.to, move.promotion));
+              }}
+            >
+              Move
+            </button>
             {opponentTurn ? (
               <label>
                 <input
