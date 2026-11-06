@@ -282,6 +282,7 @@ function App() {
   const movesVisible =
     !game.isGameOver() &&
     (opponentTurn ? moveVisibility.opponent : moveVisibility.own);
+  const movesLoading = !analysis || analysis.status === "loading" || analysis.status === "analyzing";
 
   return (
     <main>
@@ -317,7 +318,10 @@ function App() {
                   analysis?.status === "analyzing" ? "Analyzing…" : "Think more"
                 }
                 disabled={!analysis?.canContinue}
-                onClick={thinkMore}
+                onClick={() => {
+                  setReply(null);
+                  thinkMore();
+                }}
               >
                 <svg aria-hidden="true" viewBox="0 0 24 24">
                   <circle cx="10.5" cy="10.5" r="6.5" />
@@ -623,7 +627,17 @@ function App() {
           )}
           {movesVisible && (
             <div className="replies">
-              {candidates.map(({ move, opening, explanation }) => (
+              {movesLoading ? (
+                <>
+                  <span className="sr-only" role="status">Analyzing possible moves</span>
+                  {legalMoves.map((move) => (
+                    <div className="move-placeholder" key={move.lan} aria-hidden="true">
+                      <span />
+                      <span />
+                    </div>
+                  ))}
+                </>
+              ) : candidates.map(({ move, opening, explanation }) => (
                 <button
                   key={move.lan}
                   onPointerEnter={(event) => {
