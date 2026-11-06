@@ -56,7 +56,7 @@ function App() {
   );
   const about = useRef<HTMLDialogElement>(null);
   const board = useRef<HTMLDivElement>(null);
-  const detailsPane = useRef<HTMLElement>(null);
+  const detailsPane = useRef<HTMLDivElement>(null);
   const explanationWindow = useRef<HTMLDivElement>(null);
   const explanationContent = useRef<HTMLDivElement>(null);
   const moveLine = useRef<HTMLElement>(null);
@@ -491,11 +491,10 @@ function App() {
         </div>
       </section>
       <aside
-        ref={detailsPane}
         className="details-pane"
         aria-label="Position details"
-        tabIndex={0}
       >
+        <div ref={detailsPane} className="details-scroll" role="region" aria-label="Position details" tabIndex={0}>
         <section className="card explanation" aria-label="Position explanation">
           <div
             id="explanation-text"
@@ -723,6 +722,7 @@ function App() {
         {!saved && (
           <p role="alert">Could not save this session in local storage.</p>
         )}
+        </div>
       </aside>
       <dialog
         ref={about}

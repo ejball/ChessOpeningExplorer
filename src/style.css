@@ -1141,12 +1141,28 @@ body {
 /* One scrollable details pane, with a compact expandable explanation. */
 aside.details-pane {
   display: block;
-  overflow: auto;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 7px;
+  padding: 6px 0;
 }
-aside.details-pane > .card {
+.details-scroll {
+  height: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+.details-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.details-scroll::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+.details-scroll > .card {
   display: block;
   overflow: visible;
   background: transparent;
@@ -1154,7 +1170,13 @@ aside.details-pane > .card {
   border-radius: 0;
   padding: 8px;
 }
-aside.details-pane > .reply-card {
+.details-scroll > .card:first-child {
+  padding-top: 2px;
+}
+.details-scroll > .card:last-child {
+  padding-bottom: 2px;
+}
+.details-scroll > .reply-card {
   border-top: 1px solid var(--border);
 }
 .explanation-window {
@@ -1203,7 +1225,7 @@ aside.details-pane > .reply-card {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.details-pane:focus-visible,
+.details-scroll:focus-visible,
 .show-more:focus-visible {
   outline: 3px solid #c08b37;
   outline-offset: -3px;
