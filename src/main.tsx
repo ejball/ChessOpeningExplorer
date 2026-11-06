@@ -293,13 +293,16 @@ function App() {
           </strong>
           <div className="control-buttons">
             {!game.isGameOver() && (
-              <span
-                className={`evaluation-pill engine-evaluation ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
-                title={engineTooltip}
-                aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}`}
-                role="status"
-                aria-live="polite"
-                tabIndex={0}
+              <button
+                className={`evaluation-pill engine-evaluation ${movesLoading ? "is-analyzing" : ""} ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
+                title={`${engineTooltip}${analysis?.canContinue ? " · Think more" : ""}`}
+                aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}${analysis?.canContinue ? ". Think more" : ""}`}
+                aria-disabled={!analysis?.canContinue}
+                onClick={() => {
+                  if (!analysis?.canContinue) return;
+                  setReply(null);
+                  thinkMore();
+                }}
               >
                 {positionScore
                   ? boardScore(positionScore)
@@ -308,25 +311,6 @@ function App() {
                     : analysis?.status === "incomplete"
                       ? "!"
                       : "…"}
-              </span>
-            )}
-            {!game.isGameOver() && (
-              <button
-                className="icon-button"
-                aria-label="Think more"
-                title={
-                  analysis?.status === "analyzing" ? "Analyzing…" : "Think more"
-                }
-                disabled={!analysis?.canContinue}
-                onClick={() => {
-                  setReply(null);
-                  thinkMore();
-                }}
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <circle cx="10.5" cy="10.5" r="6.5" />
-                  <path d="m15.5 15.5 4.5 4.5M10.5 7.5v6m-3-3h6" />
-                </svg>
               </button>
             )}
             <button
