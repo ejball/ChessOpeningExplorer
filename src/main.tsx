@@ -620,7 +620,6 @@ function App() {
             >
               Move
             </button>
-            {queuedMovePosition === node.id && <span role="status">Waiting for analysis…</span>}
             {opponentTurn ? (
               <label>
                 <input
