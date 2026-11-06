@@ -776,6 +776,7 @@ aside {
   gap: 3px;
 }
 .navigation-button {
+  flex: none;
   border: 0;
   border-radius: 4px;
   color: white;

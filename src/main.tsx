@@ -179,7 +179,11 @@ function App() {
   useEffect(() => {
     const line = moveLine.current;
     const current = currentMove.current;
-    if (!line || !current) return;
+    if (!line) return;
+    if (!current) {
+      line.scrollLeft = 0;
+      return;
+    }
     const keepCurrentVisible = () => {
       const lineBounds = line.getBoundingClientRect();
       const moveBounds = current.getBoundingClientRect();
@@ -261,6 +265,7 @@ function App() {
     );
   }
   const positionScore = analysis?.moves[0]?.score;
+  const elapsedSeconds = Math.round((analysis?.elapsedMs ?? 0) / 1000);
   const engineTooltip = [
     "Stockfish",
     analysis?.status === "error"
@@ -271,7 +276,7 @@ function App() {
     analysis?.status === "analyzing" ? "analyzing" : "",
     analysis?.status === "incomplete" ? "incomplete" : "",
     analysis?.status === "ready" && analysis.elapsedMs
-      ? `${(analysis.elapsedMs / 1000).toFixed(1)}s`
+      ? `${elapsedSeconds} ${elapsedSeconds === 1 ? "second" : "seconds"}`
       : "",
   ]
     .filter(Boolean)
@@ -410,20 +415,22 @@ function App() {
           </div>
         )}
         <div className="board-footer">
+          <button
+            className="navigation-button"
+            aria-label="Go to start"
+            title="Go to start"
+            disabled={node.id === "root"}
+            onClick={() => go("root")}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m12 5-7 7 7 7M19 5l-7 7 7 7" />
+            </svg>
+          </button>
           <nav
             ref={moveLine}
             className="move-line"
             aria-label="Current move history"
           >
-            <button
-              ref={node.id === "root" ? currentMove : undefined}
-              className={node.id === "root" ? "selected" : ""}
-              onClick={() => {
-                if (node.id !== "root") go("root");
-              }}
-            >
-              Start
-            </button>
             {path.map((move, index) => (
               <button
                 key={move.id}
