@@ -8,6 +8,14 @@ export type Candidate = {
   explanation?: string;
 };
 
+// Candidates arrive in display order, whether ranked by the engine or not.
+export function nextUnexploredCandidate(
+  candidates: Candidate[],
+  explored: ReadonlySet<string>,
+): Candidate | undefined {
+  return candidates.find(({ move }) => !explored.has(move.lan)) ?? candidates[0];
+}
+
 // An opening label or explanation is context, not a ranking of move quality.
 export function candidatesFor(game: Chess): Candidate[] {
   const path = game.history();

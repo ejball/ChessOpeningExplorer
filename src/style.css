@@ -308,14 +308,7 @@ h2 {
   flex-wrap: wrap;
 }
 .controls strong {
-  font-size: 13px;
-}
-.controls i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
+  font-size: 15px;
 }
 .controls button,
 .promotion button,
@@ -776,6 +769,7 @@ aside {
   gap: 3px;
 }
 .navigation-button {
+  flex: none;
   border: 0;
   border-radius: 4px;
   color: white;
@@ -789,6 +783,34 @@ aside {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+}
+.move-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+}
+.move-placeholder span {
+  display: block;
+  width: 35%;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--surface-soft);
+  animation: move-placeholder-pulse 1.6s ease-in-out infinite;
+}
+.move-placeholder span + span {
+  width: 40px;
+}
+@keyframes move-placeholder-pulse {
+  50% { opacity: 0.45; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .move-placeholder span {
+    animation: none;
+  }
 }
 .replies button,
 .replies button:has(.candidate-details) {
@@ -952,7 +974,10 @@ h2,
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 18px;
-  margin: 8px 0;
+  margin: 0;
+}
+.reply-card:has(.replies) .move-visibility {
+  margin-bottom: 8px;
 }
 .move-visibility label {
   display: inline-flex;
@@ -960,6 +985,14 @@ h2,
   gap: 5px;
   font-size: 14px;
   cursor: pointer;
+}
+.move-action {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  padding: 4px 10px;
+  font-size: 14px;
 }
 .move-visibility input {
   accent-color: var(--selected);
@@ -1083,6 +1116,27 @@ body {
   outline: 3px solid #c08b37;
   outline-offset: 2px;
 }
+.controls .control-buttons .engine-evaluation {
+  width: auto;
+  min-width: 0;
+  height: 22px;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+.engine-evaluation[aria-disabled="true"] {
+  cursor: default;
+}
+.engine-evaluation.is-analyzing {
+  animation: evaluation-pulse 1.6s ease-in-out infinite;
+}
+@keyframes evaluation-pulse {
+  50% { opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .engine-evaluation.is-analyzing {
+    animation: none;
+  }
+}
 
 /* One scrollable details pane, with a compact expandable explanation. */
 aside.details-pane {
@@ -1098,7 +1152,7 @@ aside.details-pane > .card {
   background: transparent;
   border: 0;
   border-radius: 0;
-  padding: 12px;
+  padding: 8px;
 }
 aside.details-pane > .reply-card {
   border-top: 1px solid var(--border);
@@ -1119,6 +1173,12 @@ aside.details-pane > .reply-card {
 .explanation-content {
   display: flow-root;
 }
+.explanation-content > :first-child {
+  margin-top: 0;
+}
+.explanation-content > :last-child {
+  margin-bottom: 0;
+}
 .explanation .note-source {
   font-size: 12px;
   line-height: 1.4;
@@ -1128,6 +1188,9 @@ aside.details-pane > .reply-card {
 }
 .show-more-slot {
   height: 26px;
+}
+.show-more-slot:empty {
+  display: none;
 }
 .show-more {
   height: 26px;

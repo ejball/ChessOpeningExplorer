@@ -7,7 +7,7 @@ import type { DrawShape } from "chessground/draw";
 import type { Move, Square } from "chess.js";
 import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
-import { candidatesFor } from "./candidates";
+import { candidatesFor, nextUnexploredCandidate } from "./candidates";
 import { boardScore, scoreDescription, scoreSide } from "./engine";
 import { useEngine } from "./useEngine";
 import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
@@ -179,7 +179,11 @@ function App() {
   useEffect(() => {
     const line = moveLine.current;
     const current = currentMove.current;
-    if (!line || !current) return;
+    if (!line) return;
+    if (!current) {
+      line.scrollLeft = 0;
+      return;
+    }
     const keepCurrentVisible = () => {
       const lineBounds = line.getBoundingClientRect();
       const moveBounds = current.getBoundingClientRect();
@@ -261,6 +265,7 @@ function App() {
     );
   }
   const positionScore = analysis?.moves[0]?.score;
+  const elapsedSeconds = Math.round((analysis?.elapsedMs ?? 0) / 1000);
   const engineTooltip = [
     "Stockfish",
     analysis?.status === "error"
@@ -271,7 +276,7 @@ function App() {
     analysis?.status === "analyzing" ? "analyzing" : "",
     analysis?.status === "incomplete" ? "incomplete" : "",
     analysis?.status === "ready" && analysis.elapsedMs
-      ? `${(analysis.elapsedMs / 1000).toFixed(1)}s`
+      ? `${elapsedSeconds} ${elapsedSeconds === 1 ? "second" : "seconds"}`
       : "",
   ]
     .filter(Boolean)
@@ -282,23 +287,25 @@ function App() {
   const movesVisible =
     !game.isGameOver() &&
     (opponentTurn ? moveVisibility.opponent : moveVisibility.own);
+  const movesLoading = !analysis || analysis.status === "loading" || analysis.status === "analyzing";
 
   return (
     <main>
       <section className="play" aria-label="Chess board and navigation">
         <div className="controls">
-          <strong>
-            <i /> {status}
-          </strong>
+          <strong>{status}</strong>
           <div className="control-buttons">
             {!game.isGameOver() && (
-              <span
-                className={`evaluation-pill engine-evaluation ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
-                title={engineTooltip}
-                aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}`}
-                role="status"
-                aria-live="polite"
-                tabIndex={0}
+              <button
+                className={`evaluation-pill engine-evaluation ${movesLoading ? "is-analyzing" : ""} ${positionScore ? `score-${scoreSide(positionScore)}` : "score-pending"}`}
+                title={`${engineTooltip}\n(click to think more)`}
+                aria-label={`${positionScore ? scoreDescription(positionScore) : analysis?.status === "error" ? "Analysis unavailable" : analysis?.status === "incomplete" ? "Analysis incomplete" : "Analyzing"}. ${engineTooltip}${analysis?.canContinue ? ". Think more" : ""}`}
+                aria-disabled={!analysis?.canContinue}
+                onClick={() => {
+                  if (!analysis?.canContinue) return;
+                  setReply(null);
+                  thinkMore();
+                }}
               >
                 {positionScore
                   ? boardScore(positionScore)
@@ -307,22 +314,6 @@ function App() {
                     : analysis?.status === "incomplete"
                       ? "!"
                       : "…"}
-              </span>
-            )}
-            {!game.isGameOver() && (
-              <button
-                className="icon-button"
-                aria-label="Think more"
-                title={
-                  analysis?.status === "analyzing" ? "Analyzing…" : "Think more"
-                }
-                disabled={!analysis?.canContinue}
-                onClick={thinkMore}
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <circle cx="10.5" cy="10.5" r="6.5" />
-                  <path d="m15.5 15.5 4.5 4.5M10.5 7.5v6m-3-3h6" />
-                </svg>
               </button>
             )}
             <button
@@ -422,6 +413,17 @@ function App() {
           </div>
         )}
         <div className="board-footer">
+          <button
+            className="navigation-button"
+            aria-label="Go to start"
+            title="Go to start"
+            disabled={node.id === "root"}
+            onClick={() => go("root")}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="m12 5-7 7 7 7M19 5l-7 7 7 7" />
+            </svg>
+          </button>
           <nav
             ref={moveLine}
             className="move-line"
@@ -584,6 +586,20 @@ function App() {
         </section>
         <section className="card reply-card" aria-label="Next moves">
           <div className="move-visibility">
+            <button
+              type="button"
+              className="move-action"
+              disabled={game.isGameOver() || !candidates.length}
+              onClick={() => {
+                const candidate = nextUnexploredCandidate(candidates, explored);
+                if (!candidate) return;
+                const { move } = candidate;
+                setReply(null);
+                setSession((s) => play(s, move.from, move.to, move.promotion));
+              }}
+            >
+              Move
+            </button>
             {opponentTurn ? (
               <label>
                 <input
@@ -623,7 +639,17 @@ function App() {
           )}
           {movesVisible && (
             <div className="replies">
-              {candidates.map(({ move, opening, explanation }) => (
+              {movesLoading ? (
+                <>
+                  <span className="sr-only" role="status">Analyzing possible moves</span>
+                  {legalMoves.map((move) => (
+                    <div className="move-placeholder" key={move.lan} aria-hidden="true">
+                      <span />
+                      <span />
+                    </div>
+                  ))}
+                </>
+              ) : candidates.map(({ move, opening, explanation }) => (
                 <button
                   key={move.lan}
                   onPointerEnter={(event) => {
