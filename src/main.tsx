@@ -293,9 +293,7 @@ function App() {
     <main>
       <section className="play" aria-label="Chess board and navigation">
         <div className="controls">
-          <strong>
-            <i /> {status}
-          </strong>
+          <strong>{status}</strong>
           <div className="control-buttons">
             {!game.isGameOver() && (
               <button

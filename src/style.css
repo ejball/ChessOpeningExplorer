@@ -308,14 +308,7 @@ h2 {
   flex-wrap: wrap;
 }
 .controls strong {
-  font-size: 13px;
-}
-.controls i {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
+  font-size: 15px;
 }
 .controls button,
 .promotion button,
@@ -981,7 +974,10 @@ h2,
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 18px;
-  margin: 8px 0;
+  margin: 0;
+}
+.reply-card:has(.replies) .move-visibility {
+  margin-bottom: 8px;
 }
 .move-visibility label {
   display: inline-flex;
@@ -1156,7 +1152,7 @@ aside.details-pane > .card {
   background: transparent;
   border: 0;
   border-radius: 0;
-  padding: 12px;
+  padding: 8px;
 }
 aside.details-pane > .reply-card {
   border-top: 1px solid var(--border);
@@ -1177,6 +1173,12 @@ aside.details-pane > .reply-card {
 .explanation-content {
   display: flow-root;
 }
+.explanation-content > :first-child {
+  margin-top: 0;
+}
+.explanation-content > :last-child {
+  margin-bottom: 0;
+}
 .explanation .note-source {
   font-size: 12px;
   line-height: 1.4;
@@ -1186,6 +1188,9 @@ aside.details-pane > .reply-card {
 }
 .show-more-slot {
   height: 26px;
+}
+.show-more-slot:empty {
+  display: none;
 }
 .show-more {
   height: 26px;
