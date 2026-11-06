@@ -431,6 +431,15 @@ function App() {
             className="move-line"
             aria-label="Current move history"
           >
+            <button
+              ref={node.id === "root" ? currentMove : undefined}
+              className={node.id === "root" ? "selected" : ""}
+              onClick={() => {
+                if (node.id !== "root") go("root");
+              }}
+            >
+              Start
+            </button>
             {path.map((move, index) => (
               <button
                 key={move.id}
