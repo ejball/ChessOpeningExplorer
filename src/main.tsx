@@ -7,7 +7,7 @@ import type { DrawShape } from "chessground/draw";
 import type { Move, Square } from "chess.js";
 import { recognizeOpening } from "./openings";
 import { notes } from "./notes";
-import { candidatesFor, nextUnexploredCandidate } from "./candidates";
+import { candidatesFor, nextUnexploredCandidate, queuedMoveState } from "./candidates";
 import { boardScore, scoreDescription, scoreSide } from "./engine";
 import { useEngine } from "./useEngine";
 import { loadMoveVisibility, saveMoveVisibility } from "./moveVisibility";
@@ -45,6 +45,7 @@ function App() {
   const [explanationOverflows, setExplanationOverflows] = useState(false);
   const [moveVisibility, setMoveVisibility] = useState(loadMoveVisibility);
   const [engineRetry, setEngineRetry] = useState(0);
+  const [queuedMovePosition, setQueuedMovePosition] = useState<string | null>(null);
   const [promotion, setPromotion] = useState<{
     from: Square;
     to: Square;
@@ -254,11 +255,11 @@ function App() {
     analysis?.moves.map((move) => [move.uci, move]) ?? [],
   );
   const candidates = candidatesFor(game);
-  if (
+  const hasRanking =
     engineMoves.size === legalMoves.length &&
     legalMoves.length > 0 &&
-    candidates.every(({ move }) => engineMoves.has(move.lan))
-  ) {
+    candidates.every(({ move }) => engineMoves.has(move.lan));
+  if (hasRanking) {
     candidates.sort(
       (a, b) =>
         engineMoves.get(a.move.lan)!.rank - engineMoves.get(b.move.lan)!.rank,
@@ -288,6 +289,21 @@ function App() {
     !game.isGameOver() &&
     (opponentTurn ? moveVisibility.opponent : moveVisibility.own);
   const movesLoading = !analysis || analysis.status === "loading" || analysis.status === "analyzing";
+
+  useEffect(() => {
+    if (queuedMovePosition === null) return;
+    const action = queuedMoveState(queuedMovePosition, node.id, analysis, hasRanking);
+    if (action === "wait") return;
+    setQueuedMovePosition(null);
+    if (action !== "play") return;
+    const candidate = nextUnexploredCandidate(candidates, explored);
+    if (!candidate) return;
+    const { move } = candidate;
+    setReply(null);
+    setSession((s) => s.current === queuedMovePosition
+      ? play(s, move.from, move.to, move.promotion)
+      : s);
+  }, [queuedMovePosition, node.id, analysis, hasRanking, candidates, explored]);
 
   return (
     <main>
@@ -588,8 +604,13 @@ function App() {
             <button
               type="button"
               className="move-action"
-              disabled={game.isGameOver() || !candidates.length}
+              disabled={game.isGameOver() || !candidates.length || queuedMovePosition === node.id}
               onClick={() => {
+                if (movesLoading) {
+                  setReply(null);
+                  setQueuedMovePosition(node.id);
+                  return;
+                }
                 const candidate = nextUnexploredCandidate(candidates, explored);
                 if (!candidate) return;
                 const { move } = candidate;

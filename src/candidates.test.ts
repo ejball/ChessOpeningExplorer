@@ -1,8 +1,17 @@
 import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
-import { candidatesFor, nextUnexploredCandidate } from "./candidates";
+import { candidatesFor, nextUnexploredCandidate, queuedMoveState } from "./candidates";
 
 describe("candidate context", () => {
+  it("waits for the queued position's search, and cancels on navigation or missing results", () => {
+    const analyzing = { position: "a", status: "analyzing" as const, depth: 1, moves: [] };
+    expect(queuedMoveState("a", "a", undefined, false)).toBe("wait");
+    expect(queuedMoveState("a", "a", analyzing, true)).toBe("wait");
+    expect(queuedMoveState("a", "a", { ...analyzing, status: "ready" }, true)).toBe("play");
+    expect(queuedMoveState("a", "b", analyzing, true)).toBe("cancel");
+    expect(queuedMoveState("a", "a", { ...analyzing, status: "error" }, false)).toBe("cancel");
+    expect(queuedMoveState("a", "a", { ...analyzing, status: "incomplete" }, false)).toBe("cancel");
+  });
   it("selects the first unexplored candidate, falling back to the first", () => {
     const candidates = candidatesFor(new Chess());
     const [first, second] = candidates;
